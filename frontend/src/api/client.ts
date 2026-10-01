@@ -94,6 +94,13 @@ export type NetWorth = {
 export type NetWorthSnapshot = {
   id: number; date: string; currency: string; assets: string; liabilities: string; net_worth: string
 }
+export type ImportJob = {
+  id: number; filename: string; sheet_names: string[]; selected_sheet: string | null
+  headers: string[]; mapping: Record<string, string>; default_account_id: number | null
+  positive_is_income: boolean; status: 'UPLOADED' | 'PREVIEWED' | 'CONFIRMED'
+  total_rows: number; imported_rows: number; skipped_rows: number; error_rows: number
+  rows: { row_number: number; raw: Record<string, string>; parsed: Record<string, unknown> | null; error: string | null; status: string }[]
+}
 
 export const money = (value: string | number, currency = 'EUR', locale = 'es-ES') =>
   new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(value))

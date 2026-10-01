@@ -43,7 +43,7 @@ La migración inicial crea:
 | categories | id PK, user_id FK, parent_id FK, name, created_at, updated_at; índice user_id |
 | transactions | id PK, user_id FK, date, type, source_account_id FK, destination_account_id FK, category_id FK, concept, amount NUMERIC positivo, payment_method, is_fixed, is_necessary, notes, status, reconciliation, created_at, updated_at; índices (user_id,date), cuentas y categoría |
 
-La migración 0002 incorpora `IncomeSource`, `RecurringExpense`, `ScheduledExpense`, `Debt` y los vínculos de cobros o pagos con movimientos reales. La migración 0003 incorpora `SavingsRule`, `Reservation`, `SavingsGoal` y `GoalContribution`. La migración 0004 incorpora `Budget` y la 0005 `InvestmentContribution`, `InvestmentPosition` y `NetWorthSnapshot`. Las siguientes migraciones incorporarán importaciones. Todas las entidades privadas incluyen `user_id`; los cambios importantes mantienen `created_at` y `updated_at`.
+La migración 0002 incorpora `IncomeSource`, `RecurringExpense`, `ScheduledExpense`, `Debt` y los vínculos de cobros o pagos con movimientos reales. La migración 0003 incorpora `SavingsRule`, `Reservation`, `SavingsGoal` y `GoalContribution`. La migración 0004 incorpora `Budget`, la 0005 `InvestmentContribution`, `InvestmentPosition` y `NetWorthSnapshot`, y la 0006 `ImportJob`, `ImportRow` e `ImportKey`. Todas las entidades privadas incluyen `user_id`; los cambios importantes mantienen `created_at` y `updated_at`.
 
 ## Casos de uso y API
 
@@ -63,7 +63,7 @@ Base `/api/v1`; OpenAPI en `/docs`.
 
 El listado de movimientos acepta `page`, `page_size`, fechas, cuenta, tipo, categoría, texto, importes, fijo y necesario. Un movimiento puede corregirse o borrarse; el saldo se recalcula. El ajuste de conciliación guarda la diferencia positiva o negativa mediante la dirección de cuenta y `reconciliation=true`, por lo que es auditable.
 
-API implementada tras la Fase 1: `/recurring-expenses`, `/scheduled-expenses`, `/income-sources`, `/salary-cycles`, `/debts`, `/upcoming`, `/forecast`, `/planning-links`, `/savings-rules`, `/savings-recommendations`, `/reservations`, `/goals`, `/goal-contributions`, `/budgets`, `/budget-status`, `/statistics`, `/investments` y `/net-worth`. API pendiente: `/imports`, `/exports`, `/scenarios`.
+API implementada tras la Fase 1: `/recurring-expenses`, `/scheduled-expenses`, `/income-sources`, `/salary-cycles`, `/debts`, `/upcoming`, `/forecast`, `/planning-links`, `/savings-rules`, `/savings-recommendations`, `/reservations`, `/goals`, `/goal-contributions`, `/budgets`, `/budget-status`, `/statistics`, `/investments`, `/net-worth`, `/imports` y `/exports/transactions`. API pendiente: `/scenarios`.
 
 ## Previsión y ciclos de nómina
 
@@ -77,7 +77,7 @@ La regla de porcentaje se aplica al importe configurado en la fuente de ingreso;
 
 ## Importación de Excel y CSV
 
-El archivo real aún no se ha entregado. El importador aceptará CSV/XLSX en una zona temporal, detectará hojas y encabezados, ofrecerá mapeo editable de columnas y previsualización, validará fechas/importes/monedas/cuentas y mostrará errores por fila. La confirmación importará por lotes en una transacción con claves para evitar duplicados. Las filas ambiguas se omitirán hasta que el usuario las corrija. Se creará un adaptador para el Excel proporcionado cuando esté disponible, sin modificar el modelo para reproducir sus limitaciones. Exportación simétrica JSON, CSV y XLSX.
+El archivo real aún no se ha entregado. El importador acepta CSV/XLSX, detecta hojas y encabezados, ofrece mapeo editable de columnas y previsualización, valida fechas/importes/cuentas y muestra errores por fila. La confirmación importa las filas válidas en una transacción con claves para evitar duplicados. Las filas ambiguas se omiten hasta que el usuario corrija el archivo. Se creará un adaptador para el Excel proporcionado cuando esté disponible, sin modificar el modelo para reproducir sus limitaciones. Se exportan movimientos en JSON, CSV y XLSX.
 
 ## Frontend
 
@@ -91,7 +91,7 @@ El archivo real aún no se ha entregado. El importador aceptará CSV/XLSX en una
 4. Ahorro: reglas, reservas, objetivos y aportaciones. Implementada.
 5. Presupuestos y estadísticas por mes/ciclo. Implementada.
 6. Inversiones, patrimonio y snapshots. Implementada.
-7. Importación/exportación CSV/XLSX y adaptador del Excel real.
+7. Importación/exportación CSV/XLSX y adaptador del Excel real. Importación/exportación genérica implementada; adaptador específico pendiente del archivo.
 8. Simulador y comparación de escenarios.
 
 Cada fase añade migraciones, endpoints, interfaz y pruebas antes de considerarse terminada.

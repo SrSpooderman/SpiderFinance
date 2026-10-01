@@ -11,8 +11,9 @@ import ForecastPage from './features/ForecastPage'
 import SavingsPage from './features/SavingsPage'
 import BudgetsPage from './features/BudgetsPage'
 import InvestmentsPage from './features/InvestmentsPage'
+import ImportExportPage from './features/ImportExportPage'
 
-type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'investments' | 'settings'
+type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'investments' | 'imports' | 'settings'
 const sections: { id: Section; label: string; icon: string }[] = [
   { id: 'dashboard', label: 'Resumen', icon: '◫' },
   { id: 'transactions', label: 'Movimientos', icon: '⇄' },
@@ -22,6 +23,7 @@ const sections: { id: Section; label: string; icon: string }[] = [
   { id: 'savings', label: 'Ahorro', icon: '◇' },
   { id: 'budgets', label: 'Presupuestos', icon: '▥' },
   { id: 'investments', label: 'Inversiones', icon: '◈' },
+  { id: 'imports', label: 'Importar y exportar', icon: '⇅' },
   { id: 'settings', label: 'Configuración', icon: '⚙' },
 ]
 
@@ -64,6 +66,7 @@ export default function App() {
         {section === 'savings' && <SavingsPage />}
         {section === 'budgets' && <BudgetsPage />}
         {section === 'investments' && <InvestmentsPage />}
+        {section === 'imports' && <ImportExportPage />}
         {section === 'settings' && <SettingsPage />}
       </main>
     </div>

@@ -8,7 +8,7 @@ from app.api.dependencies import CurrentUser, DbSession
 from app.api.schemas import TransactionIn, TransactionOut, TransactionPage, TransactionPatch
 from app.application.finance import account_balances, user_today, validate_transaction
 from app.domain.types import TransactionType
-from app.infrastructure.models import DebtPayment, IncomeReceipt, InvestmentContribution, InvestmentPosition, RecurringPayment, ScheduledExpense, Transaction
+from app.infrastructure.models import DebtPayment, ImportKey, IncomeReceipt, InvestmentContribution, InvestmentPosition, RecurringPayment, ScheduledExpense, Transaction
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -21,9 +21,9 @@ def get_transaction(db: DbSession, user_id: int, transaction_id: int) -> Transac
 
 
 def ensure_not_linked(db: DbSession, transaction_id: int) -> None:
-    for model in (DebtPayment, IncomeReceipt, InvestmentContribution, RecurringPayment, ScheduledExpense):
+    for model in (DebtPayment, ImportKey, IncomeReceipt, InvestmentContribution, RecurringPayment, ScheduledExpense):
         if db.scalar(select(model.id).where(model.transaction_id == transaction_id).limit(1)):
-            raise HTTPException(409, "El movimiento está vinculado a una obligación; desvincúlalo antes de modificarlo")
+            raise HTTPException(409, "El movimiento está vinculado a una operación registrada y no se puede modificar")
 
 
 def ensure_investment_capacity(db: DbSession, user_id: int, old: Transaction | None, new: dict | None) -> None:
