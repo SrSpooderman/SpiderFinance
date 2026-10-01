@@ -4,7 +4,7 @@ Gestor de finanzas personales autohospedado. Permite registrar usuarios, cuentas
 
 ## Estado de la aplicación
 
-Las Fases 1 a 4 están implementadas. El resumen muestra dinero y gastos reales registrados; la previsión se identifica como tal y usa ingresos, obligaciones y movimientos pendientes. El ahorro usa reservas virtuales que reducen el disponible sin cambiar el saldo bancario. Presupuestos, inversiones, importación y simulación siguen pendientes. Las transferencias no cuentan como gasto. Los movimientos pendientes o fechados en el futuro no alteran el saldo actual.
+Las Fases 1 a 5 están implementadas. El resumen muestra dinero y gastos reales registrados; la previsión se identifica como tal y usa ingresos, obligaciones y movimientos pendientes. El ahorro usa reservas virtuales que reducen el disponible sin cambiar el saldo bancario. Presupuestos y estadísticas pueden consultarse por mes o ciclo de nómina. Inversiones, importación y simulación siguen pendientes. Las transferencias no cuentan como gasto. Los movimientos pendientes o fechados en el futuro no alteran el saldo actual.
 
 ## Requisitos
 
@@ -26,7 +26,7 @@ docker compose up -d --build
 
 Abre <http://localhost:8080>, crea tu usuario y añade una cuenta. PostgreSQL se guarda en el volumen `postgres_data`. El backend aplica migraciones Alembic al iniciar. La documentación de API está en <http://localhost:8080/docs>.
 
-El frontend contiene vistas de resumen, movimientos, cuentas, planificación, previsión, ahorro y configuración. Los formularios permiten registrar transferencias entre cuentas, ajustar saldos y crear subcategorías. En pantallas pequeñas la navegación pasa a la parte superior.
+El frontend contiene vistas de resumen, movimientos, cuentas, planificación, previsión, ahorro, presupuestos y configuración. Los formularios permiten registrar transferencias entre cuentas, ajustar saldos y crear subcategorías. En pantallas pequeñas la navegación pasa a la parte superior.
 
 ## Planificación y previsión
 
@@ -39,6 +39,10 @@ En «Planificación» puedes crear fuentes de ingreso mensuales, gastos recurren
 En «Ahorro» puedes crear objetivos con meta, moneda y prioridad; reservar dinero de una cuenta; aportar a un objetivo; y liberar reservas. Las aportaciones y liberaciones se conservan en un historial. Solo se puede reservar saldo disponible de una cuenta de la misma moneda, y una aportación no puede superar la meta pendiente. La previsión muestra el dinero reservado y lo descuenta del disponible.
 
 Las reglas de ahorro calculan propuestas por porcentaje o cantidad fija de una fuente de ingreso. Distribuyen la propuesta entre objetivos activos por prioridad. La propuesta no crea una reserva automáticamente: regístrala como aportación cuando decidas asignar el dinero.
+
+## Presupuestos y estadísticas
+
+En «Presupuestos» puedes fijar límites por categoría o para todos los gastos, separados por moneda. Cada límite se aplica al mes natural o al ciclo de nómina actual; un límite de categoría padre incluye sus subcategorías. La pantalla muestra gasto confirmado, importe restante y desglose por categoría. Los movimientos pendientes y las transferencias no cuentan como gasto realizado. Para presupuestos por ciclo se necesita una fuente de ingreso principal.
 
 ## Capturas
 

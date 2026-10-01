@@ -5,7 +5,7 @@ import { api, Dashboard, Forecast, money, Settings } from '../api/client'
 const colors = ['#2d7f71', '#9dc7ad', '#e4b370', '#789aa8', '#c78071', '#9a8bc1']
 const labels: Record<string, string> = { INCOME: 'Ingreso', EXPENSE: 'Gasto', TRANSFER: 'Transferencia', ADJUSTMENT: 'Ajuste' }
 
-export default function DashboardPage({ onNavigate }: { onNavigate: (section: 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'settings') => void }) {
+export default function DashboardPage({ onNavigate }: { onNavigate: (section: 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'settings') => void }) {
   const { data, isLoading, error } = useQuery({ queryKey: ['dashboard'], queryFn: () => api<Dashboard>('/dashboard') })
   const { data: forecast } = useQuery({ queryKey: ['forecast'], queryFn: () => api<Forecast>('/forecast') })
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: () => api<Settings>('/settings') })

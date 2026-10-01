@@ -68,6 +68,19 @@ export type SavingsRecommendation = {
   allocations: { goal_id: number; currency: string; amount: string }[]
   unallocated_by_currency: Record<string, string>
 }
+export type Budget = {
+  id: number; category_id: number | null; period: 'MONTH' | 'SALARY_CYCLE'
+  currency: string; amount: string; active: boolean
+}
+export type BudgetStatus = Budget & {
+  start: string | null; end: string | null; spent: string | null; remaining: string | null
+}
+export type Statistics = {
+  period: Budget['period']; start: string; end: string
+  income_by_currency: Record<string, string>; expense_by_currency: Record<string, string>
+  expenses_by_category: { category_id: number | null; name: string; currency: string; amount: string }[]
+  daily_expenses: { date: string; currency: string; amount: string }[]
+}
 
 export const money = (value: string | number, currency = 'EUR', locale = 'es-ES') =>
   new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(value))

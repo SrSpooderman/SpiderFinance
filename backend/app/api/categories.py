@@ -4,7 +4,7 @@ from sqlalchemy import select
 from app.api.dependencies import CurrentUser, DbSession
 from app.api.schemas import CategoryIn, CategoryOut, CategoryPatch
 from app.application.finance import get_category
-from app.infrastructure.models import Category, RecurringExpense, ScheduledExpense, Transaction
+from app.infrastructure.models import Budget, Category, RecurringExpense, ScheduledExpense, Transaction
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 
@@ -60,7 +60,7 @@ def update_category(category_id: int, data: CategoryPatch, user: CurrentUser, db
 def delete_category(category_id: int, user: CurrentUser, db: DbSession) -> None:
     category = get_category(db, user.id, category_id)
     if any(db.scalar(select(model.id).where(model.category_id == category_id).limit(1))
-           for model in (Transaction, RecurringExpense, ScheduledExpense)) or db.scalar(
+           for model in (Transaction, RecurringExpense, ScheduledExpense, Budget)) or db.scalar(
         select(Category.id).where(Category.parent_id == category_id).limit(1)
     ):
         raise HTTPException(409, "La categoría está en uso")
