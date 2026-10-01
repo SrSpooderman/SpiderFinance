@@ -19,6 +19,37 @@ export type Dashboard = {
   recent_transactions: { id: number; date: string; type: TransactionType; concept: string; amount: string; currency: string }[]
 }
 export type Settings = { currency: string; locale: string; timezone: string }
+export type IncomeSource = {
+  id: number; name: string; amount: string; account_id: number; day_rule: 'FIXED_DAY' | 'LAST_DAY_OF_MONTH' | 'FIRST_BUSINESS_DAY'
+  day_of_month: number | null; starts_on: string; ends_on: string | null; active: boolean; is_primary: boolean
+}
+export type RecurringExpense = {
+  id: number; name: string; amount: string; account_id: number; category_id: number | null
+  frequency: 'WEEKLY' | 'MONTHLY'; starts_on: string; ends_on: string | null; active: boolean
+}
+export type ScheduledExpense = {
+  id: number; name: string; amount: string; account_id: number; category_id: number | null
+  due_date: string; status: 'PLANNED' | 'PAID' | 'CANCELLED'; transaction_id: number | null
+}
+export type Debt = {
+  id: number; name: string; principal: string; installment_amount: string; remaining: string
+  account_id: number; starts_on: string; due_day: number; active: boolean
+}
+export type UpcomingEvent = {
+  date: string; kind: 'INCOME' | 'RECURRING' | 'SCHEDULED' | 'DEBT'; source_id: number
+  name: string; amount: string; currency: string; account_id: number; overdue: boolean
+}
+export type PlanningLink = {
+  id: number; kind: UpcomingEvent['kind']; source_id: number; transaction_id: number; due_date: string | null
+}
+export type Forecast = {
+  start: string; end: string
+  salary_cycle: { available: boolean; source_id: number | null; current_start: string | null; current_end: string | null; next_payday: string | null }
+  accounts: { id: number; name: string; currency: string; current: string; projected: string }[]
+  events: { date: string; account_id: number; amount: string; label: string; key: string }[]
+  days: { date: string; balances: Record<string, string>; totals_by_currency: Record<string, string> }[]
+  minimum_until_payday_by_currency: Record<string, string> | null
+}
 
 export const money = (value: string | number, currency = 'EUR', locale = 'es-ES') =>
   new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(value))

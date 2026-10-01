@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
-import { api, Dashboard, money, Settings } from '../api/client'
+import { api, Dashboard, Forecast, money, Settings } from '../api/client'
 
 const colors = ['#2d7f71', '#9dc7ad', '#e4b370', '#789aa8', '#c78071', '#9a8bc1']
 const labels: Record<string, string> = { INCOME: 'Ingreso', EXPENSE: 'Gasto', TRANSFER: 'Transferencia', ADJUSTMENT: 'Ajuste' }
 
-export default function DashboardPage({ onNavigate }: { onNavigate: (section: 'dashboard' | 'transactions' | 'accounts' | 'settings') => void }) {
+export default function DashboardPage({ onNavigate }: { onNavigate: (section: 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'settings') => void }) {
   const { data, isLoading, error } = useQuery({ queryKey: ['dashboard'], queryFn: () => api<Dashboard>('/dashboard') })
+  const { data: forecast } = useQuery({ queryKey: ['forecast'], queryFn: () => api<Forecast>('/forecast') })
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: () => api<Settings>('/settings') })
   const formatMoney = (value: string | number, currency = 'EUR') => money(value, currency, settings?.locale)
   if (isLoading) return <div className="panel">Cargando resumen...</div>
@@ -21,6 +22,7 @@ export default function DashboardPage({ onNavigate }: { onNavigate: (section: 'd
       <div className="metric-card"><div className="metric-icon pale">▣</div><span>En ahorro</span><strong>{formatMoney(primary?.savings || '0', currency)}</strong><small>Cuentas de ahorro activas</small></div>
       <div className="metric-card"><div className="metric-icon amber">⇄</div><span>Movimientos recientes</span><strong>{data.recent_transactions.length}</strong><small>Últimos registros</small></div>
     </div>
+    {forecast?.salary_cycle.available && <section className="panel"><div className="panel-header"><div><span className="eyebrow">HASTA LA PRÓXIMA NÓMINA</span><h3>Disponibilidad prevista</h3></div><button className="text-button" onClick={() => onNavigate('forecast')}>Ver previsión →</button></div><p>Próximo cobro: {forecast.salary_cycle.next_payday}. Mínimo previsto en {currency}: <strong>{formatMoney(forecast.minimum_until_payday_by_currency?.[currency] || '0', currency)}</strong>.</p></section>}
     {data.balances.length > 1 && <div className="notice">También tienes saldos en otras monedas: {data.balances.filter((item) => item.currency !== currency).map((item) => formatMoney(item.total, item.currency)).join(' · ')}. No se suman sin un tipo de cambio.</div>}
     <div className="dashboard-grid">
       <section className="panel"><div className="panel-header"><div><span className="eyebrow">ESTE MES</span><h3>Gastos por categoría</h3></div></div>

@@ -6,12 +6,16 @@ import DashboardPage from './features/DashboardPage'
 import AccountsPage from './features/AccountsPage'
 import TransactionsPage from './features/TransactionsPage'
 import SettingsPage from './features/SettingsPage'
+import PlanningPage from './features/PlanningPage'
+import ForecastPage from './features/ForecastPage'
 
-type Section = 'dashboard' | 'transactions' | 'accounts' | 'settings'
+type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'settings'
 const sections: { id: Section; label: string; icon: string }[] = [
   { id: 'dashboard', label: 'Resumen', icon: '◫' },
   { id: 'transactions', label: 'Movimientos', icon: '⇄' },
   { id: 'accounts', label: 'Cuentas', icon: '▣' },
+  { id: 'planning', label: 'Planificación', icon: '▤' },
+  { id: 'forecast', label: 'Previsión', icon: '◷' },
   { id: 'settings', label: 'Configuración', icon: '⚙' },
 ]
 
@@ -49,6 +53,8 @@ export default function App() {
         {section === 'dashboard' && <DashboardPage onNavigate={setSection} />}
         {section === 'transactions' && <TransactionsPage />}
         {section === 'accounts' && <AccountsPage />}
+        {section === 'planning' && <PlanningPage />}
+        {section === 'forecast' && <ForecastPage />}
         {section === 'settings' && <SettingsPage />}
       </main>
     </div>

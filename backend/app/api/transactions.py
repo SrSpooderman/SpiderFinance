@@ -8,7 +8,7 @@ from app.api.dependencies import CurrentUser, DbSession
 from app.api.schemas import TransactionIn, TransactionOut, TransactionPage, TransactionPatch
 from app.application.finance import validate_transaction
 from app.domain.types import TransactionType
-from app.infrastructure.models import Transaction
+from app.infrastructure.models import DebtPayment, IncomeReceipt, RecurringPayment, ScheduledExpense, Transaction
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -18,6 +18,12 @@ def get_transaction(db: DbSession, user_id: int, transaction_id: int) -> Transac
     if movement is None:
         raise HTTPException(404, "Movimiento no encontrado")
     return movement
+
+
+def ensure_not_linked(db: DbSession, transaction_id: int) -> None:
+    for model in (DebtPayment, IncomeReceipt, RecurringPayment, ScheduledExpense):
+        if db.scalar(select(model.id).where(model.transaction_id == transaction_id).limit(1)):
+            raise HTTPException(409, "El movimiento está vinculado a una obligación; desvincúlalo antes de modificarlo")
 
 
 @router.get("", response_model=TransactionPage)
@@ -75,6 +81,7 @@ def read_transaction(transaction_id: int, user: CurrentUser, db: DbSession) -> T
 @router.patch("/{transaction_id}", response_model=TransactionOut)
 def update_transaction(transaction_id: int, data: TransactionPatch, user: CurrentUser, db: DbSession) -> Transaction:
     movement = get_transaction(db, user.id, transaction_id)
+    ensure_not_linked(db, transaction_id)
     changes = data.model_dump(exclude_unset=True)
     if any(changes[key] is None for key in ("date", "type", "concept", "amount", "is_fixed", "is_necessary", "status") if key in changes):
         raise HTTPException(422, "Campo obligatorio nulo")
@@ -91,5 +98,6 @@ def update_transaction(transaction_id: int, data: TransactionPatch, user: Curren
 @router.delete("/{transaction_id}", status_code=204)
 def delete_transaction(transaction_id: int, user: CurrentUser, db: DbSession) -> None:
     movement = get_transaction(db, user.id, transaction_id)
+    ensure_not_linked(db, transaction_id)
     db.delete(movement)
     db.commit()

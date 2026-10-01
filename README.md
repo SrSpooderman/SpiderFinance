@@ -1,10 +1,10 @@
 # SpiderFinance
 
-Gestor de finanzas personales autohospedado. Esta primera versión permite registrar usuarios, cuentas, categorías y movimientos, calcular saldos por cuenta y corregir descuadres mediante ajustes de conciliación. El diseño del sistema completo está en [ARCHITECTURE.md](ARCHITECTURE.md).
+Gestor de finanzas personales autohospedado. Permite registrar usuarios, cuentas, categorías y movimientos, planificar ingresos y pagos, y consultar una previsión de saldos. El diseño del sistema completo está en [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Estado de la aplicación
 
-La Fase 1 está implementada. El resumen muestra dinero y gastos reales registrados; los módulos de planificación, previsión, ahorro, inversiones, importación y simulación están definidos para las siguientes fases y aún no aparecen como cifras disponibles. Las transferencias no cuentan como gasto. Los movimientos pendientes o fechados en el futuro no alteran el saldo actual.
+Las Fases 1, 2 y 3 están implementadas. El resumen muestra dinero y gastos reales registrados; la previsión se identifica como tal y usa ingresos, obligaciones y movimientos pendientes. Ahorro, inversiones, importación y simulación siguen pendientes. Las transferencias no cuentan como gasto. Los movimientos pendientes o fechados en el futuro no alteran el saldo actual.
 
 ## Requisitos
 
@@ -26,7 +26,13 @@ docker compose up -d --build
 
 Abre <http://localhost:8080>, crea tu usuario y añade una cuenta. PostgreSQL se guarda en el volumen `postgres_data`. El backend aplica migraciones Alembic al iniciar. La documentación de API está en <http://localhost:8080/docs>.
 
-El frontend contiene vistas de resumen, movimientos, cuentas y configuración. Los formularios permiten registrar transferencias entre cuentas, ajustar saldos y crear subcategorías. En pantallas pequeñas la navegación pasa a la parte superior.
+El frontend contiene vistas de resumen, movimientos, cuentas, planificación, previsión y configuración. Los formularios permiten registrar transferencias entre cuentas, ajustar saldos y crear subcategorías. En pantallas pequeñas la navegación pasa a la parte superior.
+
+## Planificación y previsión
+
+En «Planificación» puedes crear fuentes de ingreso mensuales, gastos recurrentes semanales o mensuales, gastos únicos y deudas con cuotas. Los vencimientos se muestran en un calendario de 90 días. Cuando registres el cobro o pago real en «Movimientos», vincúlalo al vencimiento: así se retira de los próximos pagos y el movimiento permanece como único efecto en el saldo. Los vínculos pueden corregirse sin borrar el movimiento.
+
+«Previsión» proyecta los saldos durante 30, 90, 180 o 365 días. Incluye las obligaciones activas y los movimientos pendientes o futuros. Se calcula al consultar, sin crear movimientos. Los importes de monedas distintas se muestran por separado. El ciclo de nómina requiere una fuente de ingreso marcada como principal; «primer día laborable» considera lunes a viernes, sin festivos nacionales.
 
 ## Capturas
 

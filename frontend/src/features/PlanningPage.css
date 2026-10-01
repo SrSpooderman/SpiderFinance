@@ -1,0 +1,26 @@
+.planning-header {
+  margin-top: 2rem;
+}
+
+.planning-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 1rem 0;
+}
+
+.planning-tabs button {
+  border: 1px solid #d7e5df;
+  border-radius: 999px;
+  background: #fff;
+  color: #36564e;
+  padding: .55rem 1rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.planning-tabs button.active {
+  background: #2d7f71;
+  color: #fff;
+  border-color: #2d7f71;
+}

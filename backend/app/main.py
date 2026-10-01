@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api import accounts, auth, categories, dashboard, transactions
+from app.api import accounts, auth, categories, dashboard, forecast, planning, transactions
 from app.core.config import settings
 from app.core.db import engine
 
@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
-for router in (auth.router, accounts.router, categories.router, transactions.router, dashboard.router):
+for router in (auth.router, accounts.router, categories.router, transactions.router, planning.router, forecast.router, dashboard.router):
     app.include_router(router, prefix="/api/v1")
 
 
