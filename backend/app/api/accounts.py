@@ -7,7 +7,7 @@ from app.api.dependencies import CurrentUser, DbSession
 from app.api.schemas import AccountIn, AccountOut, AccountPatch, ReconcileIn, ReconcileOut
 from app.application.finance import account_balance, account_balances, get_account
 from app.domain.types import TransactionType
-from app.infrastructure.models import Account, Transaction
+from app.infrastructure.models import Account, InvestmentContribution, InvestmentPosition, Transaction
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 
@@ -45,6 +45,20 @@ def update_account(account_id: int, data: AccountPatch, user: CurrentUser, db: D
     changes = data.model_dump(exclude_unset=True)
     if any(changes.get(key) is None for key in ("name", "type", "initial_balance", "currency", "active") if key in changes):
         raise HTTPException(422, "Campo obligatorio nulo")
+    has_positions = db.scalar(select(InvestmentPosition.id).where(
+        InvestmentPosition.user_id == user.id, InvestmentPosition.account_id == account_id
+    ).limit(1))
+    if has_positions and (
+        ("type" in changes and changes["type"] != account.type)
+        or ("currency" in changes and changes["currency"] != account.currency)
+        or ("initial_balance" in changes and changes["initial_balance"] != account.initial_balance)
+    ):
+        raise HTTPException(409, "La cuenta tiene posiciones de inversión; corrígelas antes de cambiar tipo, moneda o saldo inicial")
+    has_contributions = db.scalar(select(InvestmentContribution.id).where(
+        InvestmentContribution.user_id == user.id, InvestmentContribution.account_id == account_id
+    ).limit(1))
+    if has_contributions and "type" in changes and changes["type"] != account.type:
+        raise HTTPException(409, "La cuenta tiene aportaciones de inversión vinculadas")
     if "initial_balance" in changes or "currency" in changes:
         has_movements = db.scalar(select(Transaction.id).where(
             Transaction.user_id == user.id,

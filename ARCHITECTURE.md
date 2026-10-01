@@ -2,7 +2,7 @@
 
 ## Alcance y criterio de entrega
 
-La entrega actual implementa las Fases 1 a 5: instalación con Docker, registro e inicio de sesión, categorías y subcategorías, cuentas, movimientos, conciliación, planificación de ingresos y obligaciones, ciclos de nómina, previsión diaria, reservas virtuales con objetivos de ahorro, presupuestos y estadísticas. La previsión se distingue de los saldos reales.
+La entrega actual implementa las Fases 1 a 6: instalación con Docker, registro e inicio de sesión, categorías y subcategorías, cuentas, movimientos, conciliación, planificación de ingresos y obligaciones, ciclos de nómina, previsión diaria, reservas virtuales con objetivos de ahorro, presupuestos, estadísticas, posiciones de inversión y patrimonio por moneda. La previsión se distingue de los saldos reales.
 
 ## Arquitectura elegida
 
@@ -43,7 +43,7 @@ La migración inicial crea:
 | categories | id PK, user_id FK, parent_id FK, name, created_at, updated_at; índice user_id |
 | transactions | id PK, user_id FK, date, type, source_account_id FK, destination_account_id FK, category_id FK, concept, amount NUMERIC positivo, payment_method, is_fixed, is_necessary, notes, status, reconciliation, created_at, updated_at; índices (user_id,date), cuentas y categoría |
 
-La migración 0002 incorpora `IncomeSource`, `RecurringExpense`, `ScheduledExpense`, `Debt` y los vínculos de cobros o pagos con movimientos reales. La migración 0003 incorpora `SavingsRule`, `Reservation`, `SavingsGoal` y `GoalContribution`. La migración 0004 incorpora `Budget`. Las siguientes migraciones incorporarán `InvestmentContribution/Position`, `NetWorthSnapshot` e importaciones. Todas las entidades privadas incluyen `user_id`; los cambios importantes mantienen `created_at` y `updated_at`.
+La migración 0002 incorpora `IncomeSource`, `RecurringExpense`, `ScheduledExpense`, `Debt` y los vínculos de cobros o pagos con movimientos reales. La migración 0003 incorpora `SavingsRule`, `Reservation`, `SavingsGoal` y `GoalContribution`. La migración 0004 incorpora `Budget` y la 0005 `InvestmentContribution`, `InvestmentPosition` y `NetWorthSnapshot`. Las siguientes migraciones incorporarán importaciones. Todas las entidades privadas incluyen `user_id`; los cambios importantes mantienen `created_at` y `updated_at`.
 
 ## Casos de uso y API
 
@@ -63,7 +63,7 @@ Base `/api/v1`; OpenAPI en `/docs`.
 
 El listado de movimientos acepta `page`, `page_size`, fechas, cuenta, tipo, categoría, texto, importes, fijo y necesario. Un movimiento puede corregirse o borrarse; el saldo se recalcula. El ajuste de conciliación guarda la diferencia positiva o negativa mediante la dirección de cuenta y `reconciliation=true`, por lo que es auditable.
 
-API implementada tras la Fase 1: `/recurring-expenses`, `/scheduled-expenses`, `/income-sources`, `/salary-cycles`, `/debts`, `/upcoming`, `/forecast`, `/planning-links`, `/savings-rules`, `/savings-recommendations`, `/reservations`, `/goals`, `/goal-contributions`, `/budgets`, `/budget-status` y `/statistics`. API pendiente: `/investments`, `/net-worth`, `/imports`, `/exports`, `/scenarios`.
+API implementada tras la Fase 1: `/recurring-expenses`, `/scheduled-expenses`, `/income-sources`, `/salary-cycles`, `/debts`, `/upcoming`, `/forecast`, `/planning-links`, `/savings-rules`, `/savings-recommendations`, `/reservations`, `/goals`, `/goal-contributions`, `/budgets`, `/budget-status`, `/statistics`, `/investments` y `/net-worth`. API pendiente: `/imports`, `/exports`, `/scenarios`.
 
 ## Previsión y ciclos de nómina
 
@@ -73,7 +73,7 @@ El siguiente cobro se calcula desde una `IncomeSource` principal y su regla (`LA
 
 ## Flujo de ahorro
 
-La regla de porcentaje se aplica al importe configurado en la fuente de ingreso; la de cantidad fija propone un importe separado. La propuesta distribuye primero entre objetivos activos por prioridad hasta su importe restante y deja el excedente sin asignar. Cada aportación registra fecha, importe y cuenta; una liberación registra un importe negativo. Reservar dinero reduce el disponible, no el saldo de cuenta ni el patrimonio. Una transferencia física a ahorro se registra como transferencia. La inversión y su valoración se incorporarán en la Fase 6.
+La regla de porcentaje se aplica al importe configurado en la fuente de ingreso; la de cantidad fija propone un importe separado. La propuesta distribuye primero entre objetivos activos por prioridad hasta su importe restante y deja el excedente sin asignar. Cada aportación registra fecha, importe y cuenta; una liberación registra un importe negativo. Reservar dinero reduce el disponible, no el saldo de cuenta ni el patrimonio. Una transferencia física a ahorro o inversión se registra como transferencia. Las posiciones de inversión se valoran manualmente y el patrimonio usa el valor de mercado más el efectivo no asignado.
 
 ## Importación de Excel y CSV
 
@@ -90,7 +90,7 @@ El archivo real aún no se ha entregado. El importador aceptará CSV/XLSX en una
 3. Previsión: ciclos de nómina, motor puro, dashboard proyectado y calendario. Implementada.
 4. Ahorro: reglas, reservas, objetivos y aportaciones. Implementada.
 5. Presupuestos y estadísticas por mes/ciclo. Implementada.
-6. Inversiones, patrimonio y snapshots.
+6. Inversiones, patrimonio y snapshots. Implementada.
 7. Importación/exportación CSV/XLSX y adaptador del Excel real.
 8. Simulador y comparación de escenarios.
 

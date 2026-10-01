@@ -10,8 +10,9 @@ import PlanningPage from './features/PlanningPage'
 import ForecastPage from './features/ForecastPage'
 import SavingsPage from './features/SavingsPage'
 import BudgetsPage from './features/BudgetsPage'
+import InvestmentsPage from './features/InvestmentsPage'
 
-type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'settings'
+type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'investments' | 'settings'
 const sections: { id: Section; label: string; icon: string }[] = [
   { id: 'dashboard', label: 'Resumen', icon: '◫' },
   { id: 'transactions', label: 'Movimientos', icon: '⇄' },
@@ -20,6 +21,7 @@ const sections: { id: Section; label: string; icon: string }[] = [
   { id: 'forecast', label: 'Previsión', icon: '◷' },
   { id: 'savings', label: 'Ahorro', icon: '◇' },
   { id: 'budgets', label: 'Presupuestos', icon: '▥' },
+  { id: 'investments', label: 'Inversiones', icon: '◈' },
   { id: 'settings', label: 'Configuración', icon: '⚙' },
 ]
 
@@ -61,6 +63,7 @@ export default function App() {
         {section === 'forecast' && <ForecastPage />}
         {section === 'savings' && <SavingsPage />}
         {section === 'budgets' && <BudgetsPage />}
+        {section === 'investments' && <InvestmentsPage />}
         {section === 'settings' && <SettingsPage />}
       </main>
     </div>

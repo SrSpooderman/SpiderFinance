@@ -6,9 +6,9 @@ from sqlalchemy import func, or_, select
 
 from app.api.dependencies import CurrentUser, DbSession
 from app.api.schemas import TransactionIn, TransactionOut, TransactionPage, TransactionPatch
-from app.application.finance import validate_transaction
+from app.application.finance import account_balances, user_today, validate_transaction
 from app.domain.types import TransactionType
-from app.infrastructure.models import DebtPayment, IncomeReceipt, RecurringPayment, ScheduledExpense, Transaction
+from app.infrastructure.models import DebtPayment, IncomeReceipt, InvestmentContribution, InvestmentPosition, RecurringPayment, ScheduledExpense, Transaction
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -21,9 +21,38 @@ def get_transaction(db: DbSession, user_id: int, transaction_id: int) -> Transac
 
 
 def ensure_not_linked(db: DbSession, transaction_id: int) -> None:
-    for model in (DebtPayment, IncomeReceipt, RecurringPayment, ScheduledExpense):
+    for model in (DebtPayment, IncomeReceipt, InvestmentContribution, RecurringPayment, ScheduledExpense):
         if db.scalar(select(model.id).where(model.transaction_id == transaction_id).limit(1)):
             raise HTTPException(409, "El movimiento está vinculado a una obligación; desvincúlalo antes de modificarlo")
+
+
+def ensure_investment_capacity(db: DbSession, user_id: int, old: Transaction | None, new: dict | None) -> None:
+    today = user_today(db, user_id)
+
+    def effects(values) -> dict[int, Decimal]:
+        if values is None:
+            return {}
+        get = values.get if isinstance(values, dict) else lambda key: getattr(values, key)
+        if get("status") != "CLEARED" or get("date") > today:
+            return {}
+        result: dict[int, Decimal] = {}
+        source = get("source_account_id")
+        destination = get("destination_account_id")
+        if source is not None:
+            result[source] = result.get(source, Decimal("0")) - get("amount")
+        if destination is not None:
+            result[destination] = result.get(destination, Decimal("0")) + get("amount")
+        return result
+
+    before = effects(old)
+    after = effects(new)
+    balances = account_balances(db, user_id)
+    for account_id in before.keys() | after.keys():
+        cost = Decimal(db.scalar(select(func.coalesce(func.sum(InvestmentPosition.cost_basis), 0)).where(
+            InvestmentPosition.user_id == user_id, InvestmentPosition.account_id == account_id
+        )) or 0)
+        if cost and balances[account_id] + after.get(account_id, Decimal("0")) - before.get(account_id, Decimal("0")) < cost:
+            raise HTTPException(409, "El movimiento dejaría una cuenta de inversión sin saldo para sus posiciones")
 
 
 @router.get("", response_model=TransactionPage)
@@ -66,6 +95,7 @@ def list_transactions(
 def create_transaction(data: TransactionIn, user: CurrentUser, db: DbSession) -> Transaction:
     values = data.model_dump()
     validate_transaction(db, user.id, values)
+    ensure_investment_capacity(db, user.id, None, values)
     movement = Transaction(user_id=user.id, **values)
     db.add(movement)
     db.commit()
@@ -88,6 +118,7 @@ def update_transaction(transaction_id: int, data: TransactionPatch, user: Curren
     values = {key: getattr(movement, key) for key in TransactionIn.model_fields}
     values.update(changes)
     validate_transaction(db, user.id, values)
+    ensure_investment_capacity(db, user.id, movement, values)
     for key, value in changes.items():
         setattr(movement, key, value)
     db.commit()
@@ -99,5 +130,6 @@ def update_transaction(transaction_id: int, data: TransactionPatch, user: Curren
 def delete_transaction(transaction_id: int, user: CurrentUser, db: DbSession) -> None:
     movement = get_transaction(db, user.id, transaction_id)
     ensure_not_linked(db, transaction_id)
+    ensure_investment_capacity(db, user.id, movement, None)
     db.delete(movement)
     db.commit()

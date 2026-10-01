@@ -81,6 +81,19 @@ export type Statistics = {
   expenses_by_category: { category_id: number | null; name: string; currency: string; amount: string }[]
   daily_expenses: { date: string; currency: string; amount: string }[]
 }
+export type InvestmentPosition = {
+  id: number; account_id: number; name: string; symbol: string | null
+  units: string; cost_basis: string; market_value: string; valued_on: string
+}
+export type InvestmentContribution = { id: number; account_id: number; transaction_id: number }
+export type NetWorth = {
+  date: string
+  currencies: { currency: string; assets: string; liabilities: string; net_worth: string }[]
+  accounts: { id: number; name: string; type: AccountType; currency: string; book_balance: string; position_value: string; uninvested_cash: string; asset_value: string }[]
+}
+export type NetWorthSnapshot = {
+  id: number; date: string; currency: string; assets: string; liabilities: string; net_worth: string
+}
 
 export const money = (value: string | number, currency = 'EUR', locale = 'es-ES') =>
   new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(value))
