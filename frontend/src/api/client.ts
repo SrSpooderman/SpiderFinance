@@ -48,7 +48,25 @@ export type Forecast = {
   accounts: { id: number; name: string; currency: string; current: string; projected: string }[]
   events: { date: string; account_id: number; amount: string; label: string; key: string }[]
   days: { date: string; balances: Record<string, string>; totals_by_currency: Record<string, string> }[]
+  reserved_by_currency: Record<string, string>
+  available_now_by_currency: Record<string, string>
   minimum_until_payday_by_currency: Record<string, string> | null
+}
+export type SavingsGoal = {
+  id: number; name: string; target_amount: string; funded: string; currency: string
+  priority: number; due_date: string | null; active: boolean
+}
+export type Reservation = { id: number; account_id: number; goal_id: number | null; amount: string }
+export type SavingsRule = {
+  id: number; name: string; income_source_id: number; mode: 'PERCENT' | 'FIXED'; value: string; active: boolean
+}
+export type GoalContribution = {
+  id: number; goal_id: number; account_id: number; date: string; amount: string; notes: string | null
+}
+export type SavingsRecommendation = {
+  rules: { rule_id: number; source_id: number; currency: string; amount: string }[]
+  allocations: { goal_id: number; currency: string; amount: string }[]
+  unallocated_by_currency: Record<string, string>
 }
 
 export const money = (value: string | number, currency = 'EUR', locale = 'es-ES') =>
