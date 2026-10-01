@@ -1,0 +1,22 @@
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.core.db import Base
+from app.infrastructure.models.common import TimestampMixin
+
+
+class User(TimestampMixin, Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+
+
+class UserSettings(Base):
+    __tablename__ = "user_settings"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    currency: Mapped[str] = mapped_column(String(3), default="EUR")
+    locale: Mapped[str] = mapped_column(String(32), default="es-ES")
+    timezone: Mapped[str] = mapped_column(String(64), default="Europe/Madrid")

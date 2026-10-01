@@ -1,0 +1,9 @@
+# Se aplica sobre compose.yaml y conserva sus servicios, healthchecks y volumen.
+# Requiere Docker Compose con soporte para !reset.
+services:
+  backend:
+    build: !reset null
+    image: ghcr.io/${IMAGE_REPOSITORY:?Define IMAGE_REPOSITORY=propietario/repositorio en .env}/backend:${APP_VERSION:-latest}
+  frontend:
+    build: !reset null
+    image: ghcr.io/${IMAGE_REPOSITORY:?Define IMAGE_REPOSITORY=propietario/repositorio en .env}/frontend:${APP_VERSION:-latest}
