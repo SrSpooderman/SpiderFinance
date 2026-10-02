@@ -5,6 +5,7 @@ from app.infrastructure.models.investment import InvestmentContribution, Investm
 from app.infrastructure.models.imports import ImportJob, ImportKey, ImportRow
 from app.infrastructure.models.planning import Debt, DebtPayment, IncomeReceipt, IncomeSource, RecurringExpense, RecurringPayment, ScheduledExpense
 from app.infrastructure.models.savings import GoalContribution, Reservation, SavingsGoal, SavingsRule
+from app.infrastructure.models.scenario import Scenario
 from app.infrastructure.models.transaction import Transaction
 from app.infrastructure.models.user import User, UserSettings
 
@@ -12,5 +13,5 @@ __all__ = [
     "Account", "Budget", "Category", "Debt", "DebtPayment", "IncomeReceipt", "IncomeSource",
     "InvestmentContribution", "InvestmentPosition", "NetWorthSnapshot", "ImportJob", "ImportKey", "ImportRow",
     "RecurringExpense", "RecurringPayment", "Reservation", "SavingsGoal", "GoalContribution",
-    "SavingsRule", "ScheduledExpense", "Transaction", "User", "UserSettings",
+    "SavingsRule", "Scenario", "ScheduledExpense", "Transaction", "User", "UserSettings",
 ]

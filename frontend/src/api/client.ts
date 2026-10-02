@@ -101,6 +101,22 @@ export type ImportJob = {
   total_rows: number; imported_rows: number; skipped_rows: number; error_rows: number
   rows: { row_number: number; raw: Record<string, string>; parsed: Record<string, unknown> | null; error: string | null; status: string }[]
 }
+export type Scenario = {
+  id: number; name: string; notes: string | null
+  overrides: { key: string; amount: string }[]
+  events: { date: string; account_id: number; amount: string; label: string }[]
+  savings_percent: string | null
+}
+export type ScenarioDraft = Omit<Scenario, 'id'>
+export type Simulation = {
+  name: string; start: string; end: string; baseline: Forecast
+  days: { date: string; baseline_by_currency: Record<string, string>; scenario_by_currency: Record<string, string>; difference_by_currency: Record<string, string>; baseline_available_by_currency: Record<string, string>; scenario_available_by_currency: Record<string, string> }[]
+  final_difference_by_currency: Record<string, string>
+  minimum_scenario_by_currency: Record<string, string>
+  minimum_scenario_available_by_currency: Record<string, string>
+  simulated_savings_by_currency: Record<string, string>
+  ignored_overrides: string[]; ignored_events: number
+}
 
 export const money = (value: string | number, currency = 'EUR', locale = 'es-ES') =>
   new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(value))

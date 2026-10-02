@@ -12,8 +12,9 @@ import SavingsPage from './features/SavingsPage'
 import BudgetsPage from './features/BudgetsPage'
 import InvestmentsPage from './features/InvestmentsPage'
 import ImportExportPage from './features/ImportExportPage'
+import ScenariosPage from './features/ScenariosPage'
 
-type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'investments' | 'imports' | 'settings'
+type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'investments' | 'imports' | 'scenarios' | 'settings'
 const sections: { id: Section; label: string; icon: string }[] = [
   { id: 'dashboard', label: 'Resumen', icon: '◫' },
   { id: 'transactions', label: 'Movimientos', icon: '⇄' },
@@ -24,6 +25,7 @@ const sections: { id: Section; label: string; icon: string }[] = [
   { id: 'budgets', label: 'Presupuestos', icon: '▥' },
   { id: 'investments', label: 'Inversiones', icon: '◈' },
   { id: 'imports', label: 'Importar y exportar', icon: '⇅' },
+  { id: 'scenarios', label: 'Simulador', icon: '◎' },
   { id: 'settings', label: 'Configuración', icon: '⚙' },
 ]
 
@@ -67,6 +69,7 @@ export default function App() {
         {section === 'budgets' && <BudgetsPage />}
         {section === 'investments' && <InvestmentsPage />}
         {section === 'imports' && <ImportExportPage />}
+        {section === 'scenarios' && <ScenariosPage />}
         {section === 'settings' && <SettingsPage />}
       </main>
     </div>

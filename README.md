@@ -4,7 +4,7 @@ Gestor de finanzas personales autohospedado. Permite registrar usuarios, cuentas
 
 ## Estado de la aplicación
 
-Las Fases 1 a 6 están implementadas y la importación/exportación genérica de la Fase 7 está disponible. El resumen muestra dinero y gastos reales registrados; la previsión se identifica como tal y usa ingresos, obligaciones y movimientos pendientes. El ahorro usa reservas virtuales que reducen el disponible sin cambiar el saldo bancario. Presupuestos y estadísticas pueden consultarse por mes o ciclo de nómina. Inversiones y patrimonio se valoran manualmente por moneda. El adaptador del Excel específico del usuario y la simulación siguen pendientes. Las transferencias no cuentan como gasto. Los movimientos pendientes o fechados en el futuro no alteran el saldo actual.
+Las Fases 1 a 6 y la Fase 8 están implementadas; la importación/exportación genérica de la Fase 7 está disponible. El resumen muestra dinero y gastos reales registrados; la previsión se identifica como tal y usa ingresos, obligaciones y movimientos pendientes. El ahorro usa reservas virtuales que reducen el disponible sin cambiar el saldo bancario. Presupuestos y estadísticas pueden consultarse por mes o ciclo de nómina. Inversiones y patrimonio se valoran manualmente por moneda. El simulador compara escenarios hipotéticos sin crear movimientos reales. El adaptador del Excel específico del usuario sigue pendiente hasta recibir el archivo. Las transferencias no cuentan como gasto. Los movimientos pendientes o fechados en el futuro no alteran el saldo actual.
 
 ## Requisitos
 
@@ -26,7 +26,7 @@ docker compose up -d --build
 
 Abre <http://localhost:8080>, crea tu usuario y añade una cuenta. PostgreSQL se guarda en el volumen `postgres_data`. El backend aplica migraciones Alembic al iniciar. La documentación de API está en <http://localhost:8080/docs>.
 
-El frontend contiene vistas de resumen, movimientos, cuentas, planificación, previsión, ahorro, presupuestos, inversiones, importación/exportación y configuración. Los formularios permiten registrar transferencias entre cuentas, ajustar saldos y crear subcategorías. En pantallas pequeñas la navegación pasa a la parte superior.
+El frontend contiene vistas de resumen, movimientos, cuentas, planificación, previsión, ahorro, presupuestos, inversiones, importación/exportación, simulador y configuración. Los formularios permiten registrar transferencias entre cuentas, ajustar saldos y crear subcategorías. En pantallas pequeñas la navegación pasa a la parte superior.
 
 ## Planificación y previsión
 
@@ -53,6 +53,10 @@ Crea una cuenta de tipo «Inversión», transfiere dinero a ella desde «Movimie
 «Importar y exportar» acepta CSV UTF-8 y XLSX de hasta 5 MB y 5000 filas. Permite elegir hoja, asignar columnas de fecha, concepto e importe, seleccionar una cuenta predeterminada y revisar errores y duplicados antes de confirmar. Los importes con signo pueden convertirse en ingresos o gastos; las transferencias requieren columnas de cuenta origen y destino. La confirmación crea las filas válidas en una sola transacción y omite las erróneas o ya importadas. Si corriges un archivo, vuelve a subirlo y revisa la nueva previsualización.
 
 Puedes descargar tus movimientos en CSV, XLSX o JSON. El historial de archivos importados puede borrarse sin borrar los movimientos; las claves de deduplicación se conservan. El adaptador para el Excel concreto descrito en el proyecto queda pendiente hasta disponer de ese archivo.
+
+## Simulador
+
+En «Simulador» puedes añadir gastos o ingresos hipotéticos con fecha y cuenta, cambiar el importe de un suceso previsto o ponerlo a cero. También puedes reservar virtualmente un porcentaje de los ingresos planificados y consultar cuándo el saldo o disponible alcanza un objetivo. Compara el resultado diario con la previsión base durante 30, 90, 180 o 365 días y muestra la diferencia final por moneda. Puedes probar sin guardar o conservar varios escenarios para editarlos después. Guardar un escenario solo almacena su hipótesis: la comparación nunca crea movimientos ni modifica saldos reales. Si un suceso desaparece de la previsión o queda fuera del horizonte, se indica como ignorado.
 
 ## Capturas
 
