@@ -50,3 +50,34 @@ def test_forecast_and_salary_cycle(client, auth, monkeypatch):
     assert forecast["days"][-1]["totals_by_currency"]["EUR"] == "263.00"
     assert forecast["minimum_until_payday_by_currency"]["EUR"] == "63.00"
     assert len(forecast["events"]) == 4
+
+
+def test_current_month_overdue_recurring_is_projected_once(client, auth, monkeypatch):
+    monkeypatch.setattr("app.api.forecast.user_today", lambda db, user_id: date(2026, 2, 2))
+    monkeypatch.setattr("app.api.planning.user_today", lambda db, user_id: date(2026, 2, 2))
+    account = client.post("/api/v1/accounts", headers=auth, json={
+        "name": "Banco", "type": "CHECKING", "initial_balance": "100.00", "currency": "EUR",
+    }).json()["id"]
+    ids = {}
+    for name, amount in (("Pendiente", "20.00"), ("Pagado", "10.00")):
+        response = client.post("/api/v1/recurring-expenses", headers=auth, json={
+            "name": name, "amount": amount, "account_id": account,
+            "frequency": "MONTHLY", "starts_on": "2026-02-01",
+        })
+        assert response.status_code == 201, response.text
+        ids[name] = response.json()["id"]
+    movement = client.post("/api/v1/transactions", headers=auth, json={
+        "date": "2026-02-01", "type": "EXPENSE", "source_account_id": account,
+        "concept": "Pagado", "amount": "10.00", "status": "CLEARED",
+    })
+    assert movement.status_code == 201, movement.text
+    linked = client.post(f"/api/v1/recurring-expenses/{ids['Pagado']}/payments", headers=auth, json={
+        "due_date": "2026-02-01", "transaction_id": movement.json()["id"],
+    })
+    assert linked.status_code == 201, linked.text
+    forecast = client.get("/api/v1/forecast?days=2", headers=auth)
+    assert forecast.status_code == 200, forecast.text
+    result = forecast.json()
+    assert result["days"][0]["totals_by_currency"]["EUR"] == "70.00"
+    assert len(result["events"]) == 1
+    assert result["events"][0]["label"] == "Pendiente"

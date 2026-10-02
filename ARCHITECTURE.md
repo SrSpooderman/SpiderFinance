@@ -2,7 +2,7 @@
 
 ## Alcance y criterio de entrega
 
-La entrega actual implementa las Fases 1 a 6 y la Fase 8: instalación con Docker, registro e inicio de sesión, categorías y subcategorías, cuentas, movimientos, conciliación, planificación de ingresos y obligaciones, ciclos de nómina, previsión diaria, reservas virtuales con objetivos de ahorro, presupuestos, estadísticas, posiciones de inversión, patrimonio por moneda y escenarios de simulación. La Fase 7 incluye importación/exportación genérica; falta el adaptador del Excel real, aún no entregado. La previsión se distingue de los saldos reales.
+La entrega actual implementa las ocho fases: instalación con Docker, registro e inicio de sesión, categorías y subcategorías, cuentas, movimientos, conciliación, planificación de ingresos y obligaciones, ciclos de nómina, previsión diaria, reservas virtuales con objetivos de ahorro, presupuestos, estadísticas, posiciones de inversión, patrimonio por moneda, importación genérica y de la plantilla concreta, y escenarios de simulación. La previsión se distingue de los saldos reales.
 
 ## Arquitectura elegida
 
@@ -67,7 +67,7 @@ API implementada tras la Fase 1: `/recurring-expenses`, `/scheduled-expenses`, `
 
 ## Previsión y ciclos de nómina
 
-El motor puro recibe fecha de corte, saldos reales por cuenta y sucesos futuros normalizados. Expande recurrencias dentro de un horizonte acotado, agrega gastos únicos, cuotas, ingresos y movimientos pendientes o futuros, y elimina obligaciones pagadas vinculadas a movimientos reales. Ordena sucesos por fecha e identificador estable y produce saldos proyectados por día y mínimo por moneda antes de la próxima nómina. Las reservas virtuales se descuentan del disponible, sin modificar saldos. Nunca escribe movimientos durante una consulta. Los escenarios reutilizan esta proyección con sucesos añadidos o importes alternativos y comparan cada día con la previsión base. Guardar una hipótesis solo escribe en `scenarios`; no altera movimientos ni saldos.
+El motor puro recibe fecha de corte, saldos reales por cuenta y sucesos futuros normalizados. Expande recurrencias dentro de un horizonte acotado, incluye los vencimientos recurrentes impagados del mes actual, agrega gastos únicos, cuotas, ingresos y movimientos pendientes o futuros, y elimina obligaciones pagadas vinculadas a movimientos reales. Ordena sucesos por fecha e identificador estable y produce saldos proyectados por día y mínimo por moneda antes de la próxima nómina. Las reservas virtuales se descuentan del disponible, sin modificar saldos. Nunca escribe movimientos durante una consulta. Los escenarios reutilizan esta proyección con sucesos añadidos o importes alternativos y comparan cada día con la previsión base. Guardar una hipótesis solo escribe en `scenarios`; no altera movimientos ni saldos.
 
 El siguiente cobro se calcula desde una `IncomeSource` principal y su regla (`LAST_DAY_OF_MONTH`, día fijo o primera jornada laboral). El día 31 se ajusta al último día válido, incluidos febrero y años bisiestos. Un ciclo empieza en una fecha de cobro y termina justo antes de la fecha del cobro siguiente; las fechas de los cobros son los límites, no un número fijo de días. La zona horaria del usuario determina el día actual, pero los sucesos financieros se almacenan como fechas civiles. Si no existe nómina configurada, la interfaz indicará que el ciclo no está disponible en vez de inventarlo.
 
@@ -77,7 +77,9 @@ La regla de porcentaje se aplica al importe configurado en la fuente de ingreso;
 
 ## Importación de Excel y CSV
 
-El archivo real aún no se ha entregado. El importador acepta CSV/XLSX, detecta hojas y encabezados, ofrece mapeo editable de columnas y previsualización, valida fechas/importes/cuentas y muestra errores por fila. La confirmación importa las filas válidas en una transacción con claves para evitar duplicados. Las filas ambiguas se omiten hasta que el usuario corrija el archivo. Se creará un adaptador para el Excel proporcionado cuando esté disponible, sin modificar el modelo para reproducir sus limitaciones. Se exportan movimientos en JSON, CSV y XLSX.
+El importador genérico acepta CSV/XLSX, detecta hojas y encabezados, ofrece mapeo editable de columnas y previsualización, valida fechas/importes/cuentas y muestra errores por fila. La confirmación importa las filas válidas en una transacción con claves para evitar duplicados. Las filas ambiguas se omiten hasta que el usuario corrija el archivo. Se exportan movimientos en JSON, CSV y XLSX.
+
+La plantilla concreta se carga con `scripts/import-excel.sh` en un usuario sin datos financieros; el script hace una copia de PostgreSQL antes de aplicar el cambio. `template_import.py` valida encabezados, cuentas, categorías, tipos, fechas, importes, saldos esperados y reservas; crea en una sola transacción movimientos, planificación, presupuestos, metas y reglas. Reutiliza las categorías creadas al registrar al usuario y rechaza una segunda carga para evitar duplicados. La hoja «Ahorros» representa una separación contable virtual: se conserva como cuenta de ahorro virtual con transferencias internas y reservas equivalentes, sin aumentar el total del patrimonio. El ajuste temporal de conciliación se marca `ADJUSTMENT` y `reconciliation=true` para permitir distinguirlo de ingresos reales. Las hojas derivadas y el plan de ahorro futuro no crean movimientos confirmados.
 
 ## Simulador
 
@@ -95,7 +97,7 @@ El archivo real aún no se ha entregado. El importador acepta CSV/XLSX, detecta 
 4. Ahorro: reglas, reservas, objetivos y aportaciones. Implementada.
 5. Presupuestos y estadísticas por mes/ciclo. Implementada.
 6. Inversiones, patrimonio y snapshots. Implementada.
-7. Importación/exportación CSV/XLSX y adaptador del Excel real. Importación/exportación genérica implementada; adaptador específico pendiente del archivo.
+7. Importación/exportación CSV/XLSX y adaptador de la plantilla proporcionada. Implementada.
 8. Simulador y comparación de escenarios. Implementada.
 
 Cada fase añade migraciones, endpoints, interfaz y pruebas antes de considerarse terminada.
@@ -115,4 +117,3 @@ Cada fase añade migraciones, endpoints, interfaz y pruebas antes de considerars
 - Política de tipos de cambio y fecha de valoración para patrimonio multimoneda.
 - Enlace de pagos parciales a deudas y obligaciones.
 - Alcance del historial de auditoría de cambios y retención de importaciones.
-- Mapeo concreto del Excel del usuario cuando se proporcione.

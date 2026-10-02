@@ -342,9 +342,10 @@ def upcoming(
                 add(day, "INCOME", item, item.amount)
     for item in db.scalars(select(RecurringExpense).where(RecurringExpense.user_id == user.id, RecurringExpense.active == True)):
         paid = set(db.scalars(select(RecurringPayment.due_date).where(RecurringPayment.expense_id == item.id)))
-        for day in recurring_dates(start, end, item.frequency, item.starts_on, item.ends_on):
+        overdue_start = start.replace(day=1)
+        for day in recurring_dates(overdue_start, end, item.frequency, item.starts_on, item.ends_on):
             if day not in paid:
-                add(day, "RECURRING", item, item.amount)
+                add(day, "RECURRING", item, item.amount, day < start)
     for item in db.scalars(select(ScheduledExpense).where(
         ScheduledExpense.user_id == user.id, ScheduledExpense.status == "PLANNED", ScheduledExpense.due_date <= end
     )):

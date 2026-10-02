@@ -4,7 +4,7 @@ Gestor de finanzas personales autohospedado. Permite registrar usuarios, cuentas
 
 ## Estado de la aplicación
 
-Las Fases 1 a 6 y la Fase 8 están implementadas; la importación/exportación genérica de la Fase 7 está disponible. El resumen muestra dinero y gastos reales registrados; la previsión se identifica como tal y usa ingresos, obligaciones y movimientos pendientes. El ahorro usa reservas virtuales que reducen el disponible sin cambiar el saldo bancario. Presupuestos y estadísticas pueden consultarse por mes o ciclo de nómina. Inversiones y patrimonio se valoran manualmente por moneda. El simulador compara escenarios hipotéticos sin crear movimientos reales. El adaptador del Excel específico del usuario sigue pendiente hasta recibir el archivo. Las transferencias no cuentan como gasto. Los movimientos pendientes o fechados en el futuro no alteran el saldo actual.
+Las ocho fases están implementadas. El resumen muestra dinero y gastos reales registrados; la previsión se identifica como tal y usa ingresos, obligaciones y movimientos pendientes. El ahorro usa reservas virtuales que reducen el disponible sin cambiar el saldo total. Presupuestos y estadísticas pueden consultarse por mes o ciclo de nómina. Inversiones y patrimonio se valoran manualmente por moneda. El simulador compara escenarios hipotéticos sin crear movimientos reales. La importación genérica CSV/XLSX está en la interfaz y la plantilla de finanzas personales tiene un importador completo por consola. Las transferencias no cuentan como gasto. Los movimientos pendientes o fechados en el futuro no alteran el saldo actual.
 
 ## Requisitos
 
@@ -32,7 +32,7 @@ El frontend contiene vistas de resumen, movimientos, cuentas, planificación, pr
 
 En «Planificación» puedes crear fuentes de ingreso mensuales, gastos recurrentes semanales o mensuales, gastos únicos y deudas con cuotas. Los vencimientos se muestran en un calendario de 90 días. Cuando registres el cobro o pago real en «Movimientos», vincúlalo al vencimiento: así se retira de los próximos pagos y el movimiento permanece como único efecto en el saldo. Los vínculos pueden corregirse sin borrar el movimiento.
 
-«Previsión» proyecta los saldos durante 30, 90, 180 o 365 días. Incluye las obligaciones activas y los movimientos pendientes o futuros. Se calcula al consultar, sin crear movimientos. Los importes de monedas distintas se muestran por separado. El ciclo de nómina requiere una fuente de ingreso marcada como principal; «primer día laborable» considera lunes a viernes, sin festivos nacionales.
+«Previsión» proyecta los saldos durante 30, 90, 180 o 365 días. Incluye las obligaciones activas, los gastos recurrentes impagados del mes en curso y los movimientos pendientes o futuros. Se calcula al consultar, sin crear movimientos. Los importes de monedas distintas se muestran por separado. El ciclo de nómina requiere una fuente de ingreso marcada como principal; «primer día laborable» considera lunes a viernes, sin festivos nacionales.
 
 ## Ahorro
 
@@ -52,7 +52,16 @@ Crea una cuenta de tipo «Inversión», transfiere dinero a ella desde «Movimie
 
 «Importar y exportar» acepta CSV UTF-8 y XLSX de hasta 5 MB y 5000 filas. Permite elegir hoja, asignar columnas de fecha, concepto e importe, seleccionar una cuenta predeterminada y revisar errores y duplicados antes de confirmar. Los importes con signo pueden convertirse en ingresos o gastos; las transferencias requieren columnas de cuenta origen y destino. La confirmación crea las filas válidas en una sola transacción y omite las erróneas o ya importadas. Si corriges un archivo, vuelve a subirlo y revisa la nueva previsualización.
 
-Puedes descargar tus movimientos en CSV, XLSX o JSON. El historial de archivos importados puede borrarse sin borrar los movimientos; las claves de deduplicación se conservan. El adaptador para el Excel concreto descrito en el proyecto queda pendiente hasta disponer de ese archivo.
+Puedes descargar tus movimientos en CSV, XLSX o JSON. El historial de archivos importados desde la interfaz puede borrarse sin borrar los movimientos; las claves de deduplicación se conservan.
+
+La plantilla de finanzas personales, que contiene varias hojas relacionadas, se importa en un usuario recién registrado y sin datos financieros mediante un comando específico. El XLSX se lee desde el equipo y está ignorado por Git; no se incluye en la imagen Docker. Primero valida y después, con el ID del usuario, crea una copia de PostgreSQL y aplica toda la carga en una transacción:
+
+```bash
+./scripts/import-excel.sh 'Finanzas personales - Plantilla.xlsx' ID_USUARIO
+./scripts/import-excel.sh 'Finanzas personales - Plantilla.xlsx' ID_USUARIO --apply
+```
+
+El importador crea cuentas, categorías y subcategorías, movimientos, presupuestos, gastos recurrentes y únicos, fuente de ingresos, objetivos, reservas y regla de ahorro. Comprueba que los saldos de las cuentas coinciden con el libro y rechaza una segunda carga sobre un usuario con datos. La cuenta «Ahorros» de la plantilla se conserva como separación contable virtual; la transferencia y las reservas reproducen el total y el disponible sin sumar dinero dos veces. El ajuste provisional de conciliación se identifica como ajuste, no como ingreso ordinario. Las hojas Dashboard, Plan ahorro, Resumen mensual y Patrimonio contienen cálculos o hipótesis: no generan movimientos reales.
 
 ## Simulador
 
