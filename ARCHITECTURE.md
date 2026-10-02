@@ -8,7 +8,7 @@ La entrega actual implementa las ocho fases: instalación con Docker, registro e
 
 Monolito modular. FastAPI expone controladores delgados; los servicios de `application` aplican las reglas financieras; `domain` contiene enumeraciones y reglas puras; `infrastructure` implementa persistencia SQLAlchemy. PostgreSQL es la base principal. El frontend React consume una API versionada. Cada entidad financiera pertenece a un usuario y toda consulta se filtra por el identificador obtenido del token autenticado.
 
-El dinero se guarda como `NUMERIC(18,2)` y se transmite como cadena decimal. Se evita `float` en el backend. La moneda es un código ISO en cada cuenta. En Fase 1 una transferencia exige la misma moneda en ambas cuentas; no se inventa un tipo de cambio. Los saldos se obtienen siempre de saldos iniciales y movimientos. Un movimiento tiene importe positivo y su tipo y cuentas determinan el signo. Una transferencia es un solo registro con dos efectos opuestos.
+El dinero se guarda como `NUMERIC(18,2)` y se transmite como cadena decimal. Se evita `float` en el backend. La moneda es un código ISO en cada cuenta. En Fase 1 una transferencia exige la misma moneda en ambas cuentas; no se inventa un tipo de cambio. Los saldos se obtienen siempre de saldos iniciales y movimientos. Un movimiento tiene importe positivo y su tipo y cuentas determinan el signo. Una transferencia es un solo registro con dos efectos opuestos. El dashboard expone por moneda saldo total, ahorro en cuentas de ese tipo, reservas y disponible (`total - reservas`) para no confundir una transferencia con un gasto.
 
 ## Módulos y entidades
 

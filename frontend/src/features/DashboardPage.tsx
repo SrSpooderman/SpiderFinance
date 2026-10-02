@@ -18,10 +18,11 @@ export default function DashboardPage({ onNavigate }: { onNavigate: (section: 'd
   return <>
     <div className="page-heading"><div><span className="eyebrow">VISTA GENERAL</span><h2>Tu panorama financiero</h2><p>Dinero registrado en tus cuentas y actividad real de este mes.</p></div><button className="button primary" onClick={() => onNavigate('transactions')}>+ Nuevo movimiento</button></div>
     <div className="metric-grid">
-      <div className="metric-card featured"><div className="metric-icon">◈</div><span>Saldo total · {currency}</span><strong>{formatMoney(primary?.total || '0', currency)}</strong><small>Entre tus cuentas activas</small></div>
-      <div className="metric-card"><div className="metric-icon pale">▣</div><span>En ahorro</span><strong>{formatMoney(primary?.savings || '0', currency)}</strong><small>Cuentas de ahorro activas</small></div>
-      <div className="metric-card"><div className="metric-icon amber">⇄</div><span>Movimientos recientes</span><strong>{data.recent_transactions.length}</strong><small>Últimos registros</small></div>
+      <div className="metric-card featured"><div className="metric-icon">◈</div><span>Disponible · {currency}</span><strong>{formatMoney(primary?.available || '0', currency)}</strong><small>Saldo total menos reservas</small></div>
+      <div className="metric-card"><div className="metric-icon pale">▣</div><span>Saldo total · {currency}</span><strong>{formatMoney(primary?.total || '0', currency)}</strong><small>Incluye todas tus cuentas activas</small></div>
+      <div className="metric-card"><div className="metric-icon amber">◇</div><span>Reservado · {currency}</span><strong>{formatMoney(primary?.reserved || '0', currency)}</strong><small>En cuentas de ahorro: {formatMoney(primary?.savings || '0', currency)}</small></div>
     </div>
+    {Number(primary?.reserved || '0') > 0 && <div className="notice">Una transferencia reduce la cuenta de origen y aumenta la de destino. El saldo total no cambia; el dinero reservado se descuenta del disponible.</div>}
     {forecast?.salary_cycle.available && <section className="panel"><div className="panel-header"><div><span className="eyebrow">HASTA LA PRÓXIMA NÓMINA</span><h3>Disponibilidad prevista</h3></div><button className="text-button" onClick={() => onNavigate('forecast')}>Ver previsión →</button></div><p>Próximo cobro: {forecast.salary_cycle.next_payday}. Mínimo previsto en {currency}: <strong>{formatMoney(forecast.minimum_until_payday_by_currency?.[currency] || '0', currency)}</strong>.</p></section>}
     {data.balances.length > 1 && <div className="notice">También tienes saldos en otras monedas: {data.balances.filter((item) => item.currency !== currency).map((item) => formatMoney(item.total, item.currency)).join(' · ')}. No se suman sin un tipo de cambio.</div>}
     <div className="dashboard-grid">

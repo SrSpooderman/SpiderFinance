@@ -41,6 +41,32 @@ def test_account_balance_transfer_and_reconciliation(client, auth):
     assert balance(client, auth, savings) == "350.00"
 
 
+def test_transfer_to_reserved_savings_changes_source_and_available_not_total(client, auth):
+    checking = account(client, auth, "Personal")
+    response = client.post("/api/v1/accounts", headers=auth, json={
+        "name": "Ahorros", "type": "SAVINGS", "initial_balance": "0.00", "currency": "EUR",
+    })
+    assert response.status_code == 201, response.text
+    savings = response.json()["id"]
+    assert movement(client, auth, "INCOME", "1450.00", destination=checking).status_code == 201
+    assert movement(client, auth, "TRANSFER", "507.50", source=checking, destination=savings).status_code == 201
+    assert balance(client, auth, checking) == "942.50"
+    assert balance(client, auth, savings) == "507.50"
+    goal = client.post("/api/v1/goals", headers=auth, json={
+        "name": "Ahorro", "target_amount": "1000.00", "currency": "EUR",
+    })
+    assert goal.status_code == 201, goal.text
+    reservation = client.post(f"/api/v1/goals/{goal.json()['id']}/contributions", headers=auth, json={
+        "account_id": savings, "amount": "507.50", "date": date.today().isoformat(),
+    })
+    assert reservation.status_code == 201, reservation.text
+    summary = client.get("/api/v1/dashboard", headers=auth).json()["balances"][0]
+    assert summary["total"] == "1450.00"
+    assert summary["savings"] == "507.50"
+    assert summary["reserved"] == "507.50"
+    assert summary["available"] == "942.50"
+
+
 def test_pending_and_future_do_not_change_current_balance(client, auth):
     current = account(client, auth, "Corriente", "100.00")
     assert movement(client, auth, "EXPENSE", "20.00", source=current, status="PENDING").status_code == 201

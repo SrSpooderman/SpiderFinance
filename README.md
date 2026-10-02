@@ -4,7 +4,7 @@ Gestor de finanzas personales autohospedado. Permite registrar usuarios, cuentas
 
 ## Estado de la aplicación
 
-Las ocho fases están implementadas. El resumen muestra dinero y gastos reales registrados; la previsión se identifica como tal y usa ingresos, obligaciones y movimientos pendientes. El ahorro usa reservas virtuales que reducen el disponible sin cambiar el saldo total. Presupuestos y estadísticas pueden consultarse por mes o ciclo de nómina. Inversiones y patrimonio se valoran manualmente por moneda. El simulador compara escenarios hipotéticos sin crear movimientos reales. La importación genérica CSV/XLSX está en la interfaz y la plantilla de finanzas personales tiene un importador completo por consola. Las transferencias no cuentan como gasto. Los movimientos pendientes o fechados en el futuro no alteran el saldo actual.
+Las ocho fases están implementadas. El resumen separa el saldo total del dinero disponible después de reservas; una transferencia reduce la cuenta de origen y aumenta la de destino sin cambiar el total. La previsión se identifica como tal y usa ingresos, obligaciones y movimientos pendientes. El ahorro usa reservas virtuales que reducen el disponible sin cambiar el saldo total. Presupuestos y estadísticas pueden consultarse por mes o ciclo de nómina. Inversiones y patrimonio se valoran manualmente por moneda. El simulador compara escenarios hipotéticos sin crear movimientos reales. La importación genérica CSV/XLSX está en la interfaz y la plantilla de finanzas personales tiene un importador completo por consola. Las transferencias no cuentan como gasto. Los movimientos pendientes o fechados en el futuro no alteran el saldo actual.
 
 ## Requisitos
 

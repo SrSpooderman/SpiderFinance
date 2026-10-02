@@ -13,7 +13,7 @@ export type Movement = {
 }
 export type MovementPage = { items: Movement[]; total: number; page: number; page_size: number }
 export type Dashboard = {
-  balances: { currency: string; total: string; savings: string }[]
+  balances: { currency: string; total: string; savings: string; reserved: string; available: string }[]
   accounts: { id: number; name: string; type: AccountType; currency: string; balance: string }[]
   spending_by_category: { name: string; amount: string; currency: string }[]
   recent_transactions: { id: number; date: string; type: TransactionType; concept: string; amount: string; currency: string }[]
