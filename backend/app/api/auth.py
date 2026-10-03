@@ -3,6 +3,7 @@ from sqlalchemy import select
 
 from app.api.dependencies import CurrentUser, DbSession
 from app.api.schemas import LoginIn, RegisterIn, SettingsOut, SettingsPatch, TokenOut, UserOut
+from app.core.config import settings
 from app.core.security import create_token, hash_password, verify_password
 from app.infrastructure.models import Category, User, UserSettings
 
@@ -15,8 +16,15 @@ DEFAULT_CATEGORIES = (
 )
 
 
+@router.get("/auth/config")
+def auth_config() -> dict[str, bool]:
+    return {"registration_enabled": settings.registration_enabled}
+
+
 @router.post("/auth/register", response_model=TokenOut, status_code=201)
 def register(data: RegisterIn, db: DbSession) -> TokenOut:
+    if not settings.registration_enabled:
+        raise HTTPException(403, "El registro está desactivado")
     email = str(data.email).lower()
     if db.scalar(select(User.id).where(User.email == email)):
         raise HTTPException(409, "Ya existe una cuenta con este correo")

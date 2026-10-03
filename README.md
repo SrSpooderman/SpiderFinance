@@ -9,7 +9,7 @@ Las ocho fases están implementadas. El resumen separa el saldo total del dinero
 ## Requisitos
 
 - Docker Engine y Docker Compose.
-- Puertos locales: `8080` para la aplicación.
+- Puerto del equipo: `8080` por defecto para el frontend; configurable en `.env`.
 - No se necesita ningún servicio externo para utilizarla.
 
 ## Instalación con Docker
@@ -18,13 +18,13 @@ Las ocho fases están implementadas. El resumen separa el saldo total del dinero
 cp .env.example .env
 ```
 
-Edita `.env` con una contraseña de PostgreSQL y una clave `SECRET_KEY` aleatoria y larga. Después:
+Edita `.env` con una contraseña de PostgreSQL y una clave `SECRET_KEY` aleatoria y larga. `APP_PORT` cambia el puerto del equipo si `8080` está ocupado; `APP_BIND_ADDRESS` controla desde qué interfaz se acepta la conexión. Después:
 
 ```bash
 docker compose up -d --build
 ```
 
-Abre <http://localhost:8080>, crea tu usuario y añade una cuenta. PostgreSQL se guarda en el volumen `postgres_data`. El backend aplica migraciones Alembic al iniciar. La documentación de API está en <http://localhost:8080/docs>.
+Abre `http://localhost:<APP_PORT>`, crea tu usuario y añade una cuenta. Con los valores de ejemplo la dirección es <http://localhost:8080>. PostgreSQL se guarda en el volumen `postgres_data`. El backend aplica migraciones Alembic al iniciar. La documentación de la API no se publica a través del frontend; en desarrollo está disponible en <http://localhost:8000/docs>.
 
 El frontend contiene vistas de resumen, movimientos, cuentas, planificación, previsión, ahorro, presupuestos, inversiones, importación/exportación, simulador y configuración. Los formularios permiten registrar transferencias entre cuentas, ajustar saldos y crear subcategorías. En pantallas pequeñas la navegación pasa a la parte superior.
 
@@ -83,7 +83,20 @@ Datos de ejemplo, sin información personal real:
 | --- | --- |
 | `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Base de datos local |
 | `SECRET_KEY` | Firma de tokens JWT |
-| `CORS_ORIGINS` | Orígenes permitidos, separados por coma |
+| `APP_BIND_ADDRESS` | Interfaz del equipo donde se publica el frontend; `127.0.0.1` por defecto |
+| `APP_PORT` | Puerto del equipo para el frontend; `8080` por defecto |
+| `REGISTRATION_ENABLED` | Permite crear cuentas nuevas; cambia a `false` después del alta inicial si vas a publicar la aplicación |
+| `CORS_ORIGINS` | Orígenes permitidos para clientes externos de la API; el frontend integrado usa `/api` en el mismo origen |
+
+El único puerto publicado por Compose es el del frontend. Los puertos `80`, `8000` y `5432` son internos a los contenedores y no necesitan cambiarse cuando otro servicio utiliza esos números en el equipo. Para acceder directamente desde la red local, usa una dirección del equipo en `APP_BIND_ADDRESS` o `0.0.0.0`; esta última escucha en todas las interfaces.
+
+## Despliegue con Compose, Portainer o un proxy
+
+El archivo `compose.yaml` contiene la pila completa. Con Docker Compose, las variables se toman de `.env`; en Portainer se introducen como variables de la pila o se cargan desde un archivo `.env`. En plataformas como Coolify, configura las mismas variables en el recurso. Mantén `POSTGRES_PASSWORD` y `SECRET_KEY` fuera del repositorio.
+
+Si usas un proxy inverso, dirige el dominio HTTPS al servicio `frontend`, que escucha en el puerto interno `80`. No asignes dominio ni publiques puertos adicionales para `backend` o `postgres`. El navegador llama a `/api` en el mismo dominio y Nginx lo reenvía al backend por la red de Compose. El puerto `APP_PORT` sigue siendo configurable para el acceso directo al equipo; con `APP_BIND_ADDRESS=127.0.0.1` queda limitado a ese equipo.
+
+Antes de habilitar el acceso desde Internet, crea la cuenta inicial, cambia `REGISTRATION_ENABLED=false` y recrea el backend con `docker compose up -d` (o vuelve a desplegar la pila en tu plataforma). La pantalla de acceso dejará de ofrecer el registro y la API rechazará nuevas altas. Si necesitas otra cuenta, habilita temporalmente el registro. Los datos permanecen en el volumen de PostgreSQL entre recreaciones.
 
 Las preferencias de moneda principal, locale y zona horaria se editan por usuario en la aplicación. Cada cuenta conserva su propia moneda; las transferencias entre monedas distintas se rechazan hasta que exista una política de conversión.
 

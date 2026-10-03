@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -10,6 +10,14 @@ type Values = z.infer<typeof schema>
 export default function AuthPage({ onAuthenticated }: { onAuthenticated: (token: string) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [error, setError] = useState('')
+  const [registrationEnabled, setRegistrationEnabled] = useState(false)
+  useEffect(() => {
+    let active = true
+    api<{ registration_enabled: boolean }>('/auth/config')
+      .then((config) => { if (active) setRegistrationEnabled(config.registration_enabled) })
+      .catch(() => {})
+    return () => { active = false }
+  }, [])
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<Values>({ resolver: zodResolver(schema) })
   const submit = handleSubmit(async (values) => {
     setError('')
@@ -32,6 +40,6 @@ export default function AuthPage({ onAuthenticated }: { onAuthenticated: (token:
     <label>Contraseña<input autoComplete={mode === 'login' ? 'current-password' : 'new-password'} type="password" {...register('password')} /></label>{errors.password && <small className="error">{errors.password.message}</small>}
     {error && <div className="alert error" role="alert">{error}</div>}
     <button className="button primary wide" disabled={isSubmitting}>{isSubmitting ? 'Un momento...' : mode === 'login' ? 'Entrar' : 'Crear cuenta'}</button>
-    <div className="auth-switch">{mode === 'login' ? '¿Primera vez aquí?' : '¿Ya tienes cuenta?'} <button type="button" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError('') }}>{mode === 'login' ? 'Regístrate' : 'Inicia sesión'}</button></div>
+    {(registrationEnabled || mode === 'register') && <div className="auth-switch">{mode === 'login' ? '¿Primera vez aquí?' : '¿Ya tienes cuenta?'} <button type="button" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError('') }}>{mode === 'login' ? 'Regístrate' : 'Inicia sesión'}</button></div>}
   </form></div></div>
 }

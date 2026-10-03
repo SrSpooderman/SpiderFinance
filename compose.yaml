@@ -21,6 +21,7 @@ services:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-spiderfinance}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-spiderfinance}
       SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,7 +36,7 @@ services:
     build: ./frontend
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-8080}:80"
     depends_on:
       backend:
         condition: service_healthy

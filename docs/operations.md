@@ -18,6 +18,10 @@ El comando de inicio del backend ejecuta `alembic upgrade head` antes de servir 
 
 El workflow `.github/workflows/ci-release.yml` publica dos imágenes versionadas en GHCR y adjunta sus digests al GitHub Release. Las etiquetas automáticas se crean después de construir y subir ambas imágenes; las etiquetas manuales solo se publican si pasan las mismas pruebas. En una instalación basada en imágenes, `APP_VERSION` puede fijar una versión concreta para evitar actualizaciones inesperadas de `latest`.
 
-## Seguridad local
+## Seguridad y acceso público
 
-Genera claves distintas para cada instalación y no publiques el puerto de PostgreSQL. Si expones la aplicación a Internet, coloca HTTPS delante del puerto 8080 y configura el origen público en `CORS_ORIGINS`. El registro público de usuarios está habilitado en esta fase, apropiado para un servidor local privado; antes de abrirlo a Internet debe añadirse una política de invitaciones o desactivar el registro después de crear el primer usuario.
+Genera claves distintas para cada instalación y no publiques los puertos de PostgreSQL ni del backend. El único puerto publicado por `compose.yaml` es el del frontend, controlado por `APP_BIND_ADDRESS` y `APP_PORT`. La dirección predeterminada `127.0.0.1` permite acceder desde el propio equipo; para otras interfaces, configura una dirección concreta o `0.0.0.0`.
+
+Si expones la aplicación a Internet, dirige un dominio HTTPS mediante un proxy inverso al frontend, en su puerto interno `80`. El frontend reenvía `/api` al backend por la red de Compose: la API es accesible a través del dominio aunque su contenedor no tenga un puerto publicado. `CORS_ORIGINS` solo afecta a clientes de la API alojados en otro origen; no protege la API ni es necesario cambiarlo para el frontend integrado.
+
+Antes de publicar el dominio, crea la cuenta inicial con `REGISTRATION_ENABLED=true`, cambia la variable a `false` y recrea el backend. Comprueba que `GET /api/v1/auth/config` devuelve `registration_enabled: false` y que la pantalla ya no ofrece el registro. Nginx no reenvía `/docs`, `/redoc` ni `/openapi.json` desde el dominio público.
