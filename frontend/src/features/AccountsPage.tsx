@@ -42,7 +42,7 @@ export default function AccountsPage() {
     reset(account ? { name: account.name, type: account.type, institution: account.institution || '', initial_balance: account.initial_balance, currency: account.currency, notes: account.notes || '' } : { name: '', type: 'CHECKING', institution: '', initial_balance: '0.00', currency: settings?.currency || 'EUR', notes: '' })
     setShowForm(true)
   }
-  return <><div className="page-heading"><div><span className="eyebrow">ORGANIZACIÓN</span><h2>Tus cuentas</h2><p>El saldo se calcula con los movimientos registrados.</p></div><button className="button primary" onClick={() => open()}>+ Añadir cuenta</button></div>
+  return <><div className="page-heading"><div><span className="eyebrow">ORGANIZACIÓN</span><h2>Tus cuentas</h2></div><button className="button primary" onClick={() => open()}>+ Añadir cuenta</button></div>
     {notice && <div className="notice" role="status">{notice}</div>}
     {showForm && <section className="panel form-panel"><div className="panel-header"><h3>{editing ? 'Editar cuenta' : 'Nueva cuenta'}</h3><button className="icon-button" onClick={() => setShowForm(false)}>×</button></div><form onSubmit={handleSubmit((values) => save.mutate(values))} className="form-grid">
       <label>Nombre<input {...register('name')} /></label><label>Tipo<select {...register('type')}>{accountTypes.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>

@@ -59,7 +59,7 @@ export default function BudgetsPage() {
     .map((item) => ({ name: item.name, amount: Number(item.amount) })) || []
   const visible = statuses.filter((item) => item.period === period)
   return <>
-    <div className="page-heading"><div><span className="eyebrow">CONTROL DE GASTOS</span><h2>Presupuestos y estadísticas</h2><p>Compara tus límites con gastos confirmados del periodo.</p></div><button className="button primary" onClick={() => open()}>+ Presupuesto</button></div>
+    <div className="page-heading"><div><span className="eyebrow">CONTROL DE GASTOS</span><h2>Presupuestos y estadísticas</h2></div><button className="button primary" onClick={() => open()}>+ Presupuesto</button></div>
     {notice && <div className="notice" role="status">{notice}</div>}
     <section className="panel"><div className="inline-form"><label>Periodo<select value={period} onChange={(event) => setPeriod(event.target.value as Period)}><option value="MONTH">Mes natural</option><option value="SALARY_CYCLE">Ciclo de nómina</option></select></label><label>Fecha de referencia<input type="date" value={day} onChange={(event) => setAsOf(event.target.value)} /></label></div></section>
     {draft && <section className="panel form-panel"><div className="panel-header"><h3>{editingId ? 'Editar presupuesto' : 'Nuevo presupuesto'}</h3><button className="icon-button" onClick={() => setDraft(null)}>×</button></div><form className="form-grid" onSubmit={submit}>

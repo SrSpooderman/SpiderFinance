@@ -55,7 +55,7 @@ export default function TransactionsPage() {
     setShowForm(true)
   }
   const accountName = (id: number | null) => accounts.find((item) => item.id === id)?.name || '—'
-  return <><div className="page-heading"><div><span className="eyebrow">REGISTRO</span><h2>Movimientos</h2><p>Ingresos, gastos y transferencias en un mismo lugar.</p></div><button className="button primary" onClick={() => open()}>+ Nuevo movimiento</button></div>
+  return <><div className="page-heading"><div><span className="eyebrow">REGISTRO</span><h2>Movimientos</h2></div><button className="button primary" onClick={() => open()}>+ Nuevo movimiento</button></div>
     {notice && <div className="notice" role="status">{notice}</div>}
     {showForm && <section className="panel form-panel"><div className="panel-header"><h3>{editing ? 'Editar movimiento' : 'Nuevo movimiento'}</h3><button className="icon-button" onClick={() => setShowForm(false)}>×</button></div><form className="form-grid" onSubmit={handleSubmit((values) => save.mutate(values))}>
       <label>Tipo<select {...register('type')}><option value="EXPENSE">Gasto</option><option value="INCOME">Ingreso</option><option value="TRANSFER">Transferencia</option><option value="ADJUSTMENT">Ajuste</option></select></label><label>Fecha<input type="date" {...register('date')} /></label>

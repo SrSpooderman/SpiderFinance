@@ -103,7 +103,7 @@ export default function SavingsPage() {
   })
   const submit = (event: FormEvent, action: () => void) => { event.preventDefault(); action() }
   return <>
-    <div className="page-heading"><div><span className="eyebrow">DISPONIBILIDAD REAL</span><h2>Ahorro y objetivos</h2><p>Reservar dinero reduce lo disponible; no mueve fondos ni cambia el saldo bancario.</p></div><button className="button primary" onClick={() => openGoal()}>+ Nuevo objetivo</button></div>
+    <div className="page-heading"><div><span className="eyebrow">DISPONIBILIDAD REAL</span><h2>Ahorro y objetivos</h2></div><button className="button primary" onClick={() => openGoal()}>+ Nuevo objetivo</button></div>
     {notice && <div className="notice" role="status">{notice}</div>}
     {goalDraft && <section className="panel form-panel"><div className="panel-header"><h3>{editingGoal ? 'Editar objetivo' : 'Nuevo objetivo'}</h3><button className="icon-button" onClick={() => setGoalDraft(null)}>×</button></div>
       <form className="form-grid" onSubmit={(event) => submit(event, () => saveGoal.mutate())}>

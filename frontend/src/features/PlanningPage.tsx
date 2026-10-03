@@ -165,7 +165,7 @@ export default function PlanningPage() {
   ) || []
 
   return <>
-    <div className="page-heading"><div><span className="eyebrow">PRÓXIMOS COMPROMISOS</span><h2>Planificación</h2><p>Registra lo previsto y vincúlalo después a los movimientos reales.</p></div></div>
+    <div className="page-heading"><div><span className="eyebrow">PRÓXIMOS COMPROMISOS</span><h2>Planificación</h2></div></div>
     {notice && <div className="notice" role="status">{notice}</div>}
     <section className="panel">
       <div className="panel-header"><div><span className="eyebrow">CALENDARIO</span><h3>Próximos 90 días</h3></div></div>

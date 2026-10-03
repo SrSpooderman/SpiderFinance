@@ -71,7 +71,7 @@ export default function ScenariosPage() {
     ? result.days.find((item) => Number((chartMode === 'available' ? item.scenario_available_by_currency : item.scenario_by_currency)[selectedCurrency] || '0') >= Number(targetAmount.replace(',', '.')))?.date
     : null
   return <>
-    <div className="page-heading"><div><span className="eyebrow">QUÉ PASARÍA SI...</span><h2>Simulador</h2><p>Añade un gasto o ingreso hipotético, o cambia un suceso previsto. La simulación no crea movimientos reales.</p></div></div>
+    <div className="page-heading"><div><span className="eyebrow">QUÉ PASARÍA SI...</span><h2>Simulador</h2></div></div>
     {notice && <div className="notice" role="status">{notice}</div>}
     <section className="panel"><div className="inline-form"><label>Horizonte<select value={days} onChange={(event) => { setDays(Number(event.target.value)); setResult(null) }}><option value={30}>30 días</option><option value={90}>90 días</option><option value={180}>180 días</option><option value={365}>365 días</option></select></label>{units.length > 1 && <label>Moneda<select value={selectedCurrency} onChange={(event) => setCurrency(event.target.value)}>{units.map((unit) => <option key={unit}>{unit}</option>)}</select></label>}</div></section>
     <section className="panel"><div className="panel-header"><div><span className="eyebrow">MIS ESCENARIOS</span><h3>Guardados</h3></div><button className="button secondary" onClick={() => { setEditingId(null); update(emptyDraft()); setNotice('') }}>Nuevo escenario</button></div>
