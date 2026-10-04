@@ -20,3 +20,4 @@ class UserSettings(Base):
     currency: Mapped[str] = mapped_column(String(3), default="EUR")
     locale: Mapped[str] = mapped_column(String(32), default="es-ES")
     timezone: Mapped[str] = mapped_column(String(64), default="Europe/Madrid")
+    theme: Mapped[str] = mapped_column(String(20), default="light-teal")

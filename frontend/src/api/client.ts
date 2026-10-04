@@ -18,7 +18,8 @@ export type Dashboard = {
   spending_by_category: { name: string; amount: string; currency: string }[]
   recent_transactions: { id: number; date: string; type: TransactionType; concept: string; amount: string; currency: string }[]
 }
-export type Settings = { currency: string; locale: string; timezone: string }
+export type Theme = 'light-teal' | 'light-red' | 'dark-red' | 'dark-purple'
+export type Settings = { currency: string; locale: string; timezone: string; theme: Theme }
 export type IncomeSource = {
   id: number; name: string; amount: string; account_id: number; day_rule: 'FIXED_DAY' | 'LAST_DAY_OF_MONTH' | 'FIRST_BUSINESS_DAY'
   day_of_month: number | null; starts_on: string; ends_on: string | null; active: boolean; is_primary: boolean

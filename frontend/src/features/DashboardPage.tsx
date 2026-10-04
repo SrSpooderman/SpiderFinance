@@ -3,7 +3,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { AccountType, api, Dashboard, Forecast, money, Settings } from '../api/client'
 import './DashboardPage.css'
 
-const colors = ['#2d7f71', '#9dc7ad', '#e4b370', '#789aa8', '#c78071', '#9a8bc1']
+const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)']
 const labels: Record<string, string> = { INCOME: 'Ingreso', EXPENSE: 'Gasto', TRANSFER: 'Transferencia', ADJUSTMENT: 'Ajuste' }
 const accountTypes: Record<AccountType, string> = {
   CHECKING: 'Corriente', SAVINGS: 'Ahorros', CASH: 'Efectivo',

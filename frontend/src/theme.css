@@ -1,0 +1,278 @@
+:root {
+  color-scheme: light;
+  --page: #f4f6f5;
+  --surface: #fff;
+  --surface-soft: #f6f9f8;
+  --text: #243446;
+  --strong: #2a3d48;
+  --body: #60717b;
+  --muted: #778590;
+  --faint: #9aa7ae;
+  --border: #e4ebeb;
+  --line: #e9eeee;
+  --accent: #268270;
+  --accent-strong: #237f70;
+  --accent-hover: #19685c;
+  --accent-soft: #e5f1ed;
+  --accent-soft-text: #26806e;
+  --accent-border: #b5d7cb;
+  --button-text: #fff;
+  --sidebar: #112239;
+  --sidebar-active: #213c50;
+  --sidebar-text: #b6c3cf;
+  --sidebar-border: #294053;
+  --sidebar-muted: #8093a6;
+  --nav-indicator: #6fc4a3;
+  --avatar: #395b63;
+  --brand-mark: #3b967f;
+  --brand-accent: #78ceb4;
+  --featured-start: #1b766a;
+  --featured-end: #2e9986;
+  --featured-border: #227f73;
+  --featured-text: #ccece2;
+  --shadow: 0 5px 18px #1b394509;
+  --input: #fff;
+  --input-border: #dce5e6;
+  --input-text: #223b45;
+  --notice: #e9f5f0;
+  --notice-border: #b8dfd1;
+  --notice-text: #256b5d;
+  --error: #fff0ee;
+  --error-text: #b34d46;
+  --positive: #1a9277;
+  --expense-soft: #fff0ea;
+  --expense-text: #c88060;
+  --transfer-soft: #e9f0f8;
+  --transfer-text: #668bac;
+  --adjust-soft: #f0edfa;
+  --adjust-text: #8878ae;
+  --auth-end: #1e685f;
+  --auth-text: #c5dbd9;
+  --chart-1: #2d7f71;
+  --chart-2: #9dc7ad;
+  --chart-3: #e4b370;
+  --chart-4: #789aa8;
+  --chart-5: #c78071;
+  --chart-6: #9a8bc1;
+}
+
+:root[data-theme='light-red'] {
+  --page: #faf5f5;
+  --surface: #fffdfd;
+  --surface-soft: #fbf1f2;
+  --text: #392b32;
+  --strong: #382932;
+  --body: #705d65;
+  --muted: #8b747d;
+  --faint: #a58d95;
+  --border: #efdee2;
+  --line: #f1e4e6;
+  --accent: #b64252;
+  --accent-strong: #b63849;
+  --accent-hover: #92283a;
+  --accent-soft: #fae8eb;
+  --accent-soft-text: #aa3445;
+  --accent-border: #e9b7bf;
+  --sidebar: #341d28;
+  --sidebar-active: #633040;
+  --sidebar-text: #e8cbd2;
+  --sidebar-border: #69404b;
+  --sidebar-muted: #ceabb4;
+  --nav-indicator: #f18b9a;
+  --avatar: #764353;
+  --brand-mark: #bf4a5d;
+  --brand-accent: #ff9dac;
+  --featured-start: #a92e42;
+  --featured-end: #d45b67;
+  --featured-border: #a92e42;
+  --featured-text: #ffe5e9;
+  --input: #fff;
+  --input-border: #e8cdd2;
+  --input-text: #382932;
+  --notice: #fcebee;
+  --notice-border: #ebbac2;
+  --notice-text: #983044;
+  --auth-end: #8c3145;
+  --auth-text: #ffe1e6;
+  --chart-1: #b63849;
+  --chart-2: #e39aa6;
+  --chart-3: #d4a163;
+  --chart-4: #9c7e92;
+  --chart-5: #d77983;
+  --chart-6: #9671ae;
+}
+
+:root[data-theme='dark-red'],
+:root[data-theme='dark-purple'] {
+  color-scheme: dark;
+  --button-text: #fff;
+  --error: #47262c;
+  --error-text: #ffb6bd;
+  --positive: #77d6a9;
+  --expense-soft: #4a302e;
+  --expense-text: #f4aa8f;
+  --transfer-soft: #263748;
+  --transfer-text: #a6c8ee;
+  --adjust-soft: #382e4b;
+  --adjust-text: #ccb8fa;
+}
+
+:root[data-theme='dark-red'] {
+  --page: #121216;
+  --surface: #1f2026;
+  --surface-soft: #2a2a31;
+  --text: #f2e9eb;
+  --strong: #fff4f5;
+  --body: #d2c1c5;
+  --muted: #bda6ad;
+  --faint: #a78f97;
+  --border: #45363d;
+  --line: #3d3239;
+  --accent: #ef7887;
+  --accent-strong: #bb3c50;
+  --accent-hover: #a62f43;
+  --accent-soft: #4b2b36;
+  --accent-soft-text: #ff9baa;
+  --accent-border: #70434f;
+  --sidebar: #1c1119;
+  --sidebar-active: #48232e;
+  --sidebar-text: #e2bcc6;
+  --sidebar-border: #51303b;
+  --sidebar-muted: #bd929e;
+  --nav-indicator: #f1899a;
+  --avatar: #603542;
+  --brand-mark: #c24c60;
+  --brand-accent: #ff9aaa;
+  --featured-start: #792336;
+  --featured-end: #b53f52;
+  --featured-border: #792336;
+  --featured-text: #ffe2e7;
+  --shadow: 0 5px 18px #00000030;
+  --input: #2a252c;
+  --input-border: #60434c;
+  --input-text: #fff1f3;
+  --notice: #39242d;
+  --notice-border: #754252;
+  --notice-text: #ffd3da;
+  --auth-end: #682738;
+  --auth-text: #f4cbd4;
+  --chart-1: #ed8493;
+  --chart-2: #bfa3a9;
+  --chart-3: #e9b978;
+  --chart-4: #8eb7c5;
+  --chart-5: #df9c83;
+  --chart-6: #b39bd7;
+}
+
+:root[data-theme='dark-purple'] {
+  --page: #14121d;
+  --surface: #23202f;
+  --surface-soft: #2e2a3d;
+  --text: #f0ecf8;
+  --strong: #faf6ff;
+  --body: #d0c8df;
+  --muted: #b7accb;
+  --faint: #9f93b5;
+  --border: #423a55;
+  --line: #39334c;
+  --accent: #c0a5ff;
+  --accent-strong: #7856bd;
+  --accent-hover: #6444a7;
+  --accent-soft: #43345f;
+  --accent-soft-text: #d4bfff;
+  --accent-border: #685487;
+  --sidebar: #1b1629;
+  --sidebar-active: #413359;
+  --sidebar-text: #d7c7ed;
+  --sidebar-border: #4b3c63;
+  --sidebar-muted: #b19dc9;
+  --nav-indicator: #c0a5ff;
+  --avatar: #54426d;
+  --brand-mark: #8060bf;
+  --brand-accent: #d8b6ff;
+  --featured-start: #4e347d;
+  --featured-end: #7855ad;
+  --featured-border: #4e347d;
+  --featured-text: #eee1ff;
+  --shadow: 0 5px 18px #00000030;
+  --input: #2c283b;
+  --input-border: #625475;
+  --input-text: #f8f2ff;
+  --notice: #382d4d;
+  --notice-border: #75618e;
+  --notice-text: #ead7ff;
+  --auth-end: #583c83;
+  --auth-text: #e6d6f5;
+  --chart-1: #c4a9ff;
+  --chart-2: #9d8dc5;
+  --chart-3: #e7b78a;
+  --chart-4: #94b7d7;
+  --chart-5: #d98caa;
+  --chart-6: #ba9be3;
+}
+
+:root[data-theme] { background: var(--page); color: var(--text); }
+:root[data-theme] body { background: var(--page); color: var(--text); }
+:root[data-theme] p, :root[data-theme] .page-heading p { color: var(--muted); }
+:root[data-theme] .sidebar { background: var(--sidebar); color: var(--sidebar-text); }
+:root[data-theme] .brand-accent { color: var(--brand-accent); }
+:root[data-theme] .nav-caption, :root[data-theme] .sidebar .eyebrow { color: var(--sidebar-muted); }
+:root[data-theme] .nav-item { color: var(--sidebar-text); }
+:root[data-theme] .nav-item:hover, :root[data-theme] .nav-item.active { background: var(--sidebar-active); color: #fff; box-shadow: inset 3px 0 var(--nav-indicator); }
+:root[data-theme] .nav-icon { color: var(--sidebar-muted); }
+:root[data-theme] .sidebar-bottom { border-color: var(--sidebar-border); }
+:root[data-theme] .sidebar-bottom small { color: var(--sidebar-muted); }
+:root[data-theme] .avatar { background: var(--avatar); }
+:root[data-theme] .brand-mark { background: var(--brand-mark); }
+:root[data-theme] .topbar { background: var(--surface); border-color: var(--border); }
+:root[data-theme] .topbar-date, :root[data-theme] .eyebrow { color: var(--faint); }
+:root[data-theme] .metric-card, :root[data-theme] .panel, :root[data-theme] .account-card { background: var(--surface); border-color: var(--border); color: var(--text); box-shadow: var(--shadow); }
+:root[data-theme] .metric-card.featured { background: linear-gradient(115deg, var(--featured-start), var(--featured-end)); border-color: var(--featured-border); color: #fff; }
+:root[data-theme] .metric-card > span, :root[data-theme] .metric-card small { color: var(--muted); }
+:root[data-theme] .metric-card.featured > span, :root[data-theme] .metric-card.featured small { color: var(--featured-text); }
+:root[data-theme] .metric-icon.pale, :root[data-theme] .activity-icon, :root[data-theme] .account-symbol { background: var(--accent-soft); color: var(--accent-soft-text); }
+:root[data-theme] .chip { background: var(--accent-soft); color: var(--accent-soft-text); }
+:root[data-theme] .metric-icon.amber { background: var(--expense-soft); color: var(--expense-text); }
+:root[data-theme] .activity-icon.expense { background: var(--expense-soft); color: var(--expense-text); }
+:root[data-theme] .button.primary { background: var(--accent-strong); color: var(--button-text); box-shadow: 0 4px 11px #00000018; }
+:root[data-theme] .button.primary:hover { background: var(--accent-hover); }
+:root[data-theme] .button.secondary { background: var(--surface); border-color: var(--border); color: var(--body); }
+:root[data-theme] .text-button, :root[data-theme] .row-actions button, :root[data-theme] .card-actions button, :root[data-theme] .category-list button, :root[data-theme] .pagination button, :root[data-theme] .auth-switch button { color: var(--accent); }
+:root[data-theme] .metric-card strong, :root[data-theme] .account-balance, :root[data-theme] .activity strong, :root[data-theme] .account-summary strong { color: var(--strong); }
+:root[data-theme] .metric-card.featured strong { color: #fff; }
+:root[data-theme] .activity, :root[data-theme] .card-actions, :root[data-theme] .category-list > div { border-color: var(--line); }
+:root[data-theme] .activity small, :root[data-theme] .account-summary small, :root[data-theme] .empty, :root[data-theme] .table-note, :root[data-theme] .hint, :root[data-theme] .pagination { color: var(--faint); }
+:root[data-theme] .account-summary > div { background: var(--surface-soft); }
+:root[data-theme] .account-card p, :root[data-theme] .account-summary > div, :root[data-theme] .legend > div { color: var(--body); }
+:root[data-theme] .positive { color: var(--positive) !important; }
+:root[data-theme] .notice { background: var(--notice); border-color: var(--notice-border); color: var(--notice-text); }
+:root[data-theme] .alert.error { background: var(--error); color: var(--error-text); }
+:root[data-theme] .error { color: var(--error-text); }
+:root[data-theme] .form-panel { border-color: var(--accent-border); }
+:root[data-theme] .form-grid label, :root[data-theme] .settings-fields label, :root[data-theme] .inline-form label, :root[data-theme] .auth-card label { color: var(--body); }
+:root[data-theme] input, :root[data-theme] select, :root[data-theme] textarea, :root[data-theme] option,
+:root[data-theme] .planning-link-form .inline-form select { background: var(--input); border-color: var(--input-border); color: var(--input-text); }
+:root[data-theme] input::placeholder, :root[data-theme] textarea::placeholder { color: var(--faint); }
+:root[data-theme] input:focus, :root[data-theme] select:focus, :root[data-theme] textarea:focus { border-color: var(--accent); outline-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+:root[data-theme] th { color: var(--faint); border-color: var(--line); }
+:root[data-theme] td { color: var(--body); border-color: var(--line); }
+:root[data-theme] td strong { color: var(--strong); }
+:root[data-theme] .type-pill { background: var(--accent-soft); color: var(--accent-soft-text); }
+:root[data-theme] .type-pill.expense { background: var(--expense-soft); color: var(--expense-text); }
+:root[data-theme] .type-pill.transfer { background: var(--transfer-soft); color: var(--transfer-text); }
+:root[data-theme] .type-pill.adjustment { background: var(--adjust-soft); color: var(--adjust-text); }
+:root[data-theme] .filters span { color: var(--faint); }
+:root[data-theme] .planning-month, :root[data-theme] .planning-link-row > td { border-color: var(--line); }
+:root[data-theme] .planning-month summary::before { color: var(--accent); }
+:root[data-theme] .planning-month-name, :root[data-theme] .dashboard-balance-types b { color: var(--strong); }
+:root[data-theme] .planning-month-count, :root[data-theme] .dashboard-balance-types > div { color: var(--body); }
+:root[data-theme] .planning-link-form { background: var(--surface-soft); border-color: var(--accent-border); }
+:root[data-theme] .planning-tabs button { background: var(--surface); border-color: var(--border); color: var(--body); }
+:root[data-theme] .planning-tabs button.active { background: var(--accent-strong); border-color: var(--accent-strong); color: var(--button-text); }
+:root[data-theme] .dashboard-current-available { color: var(--featured-text); }
+:root[data-theme] .auth-intro { background: linear-gradient(140deg, var(--sidebar), var(--auth-end)); }
+:root[data-theme] .auth-intro p, :root[data-theme] .auth-intro small { color: var(--auth-text); }
+:root[data-theme] .auth-switch { color: var(--muted); }
+:root[data-theme] .recharts-text, :root[data-theme] .recharts-cartesian-axis-tick-value { fill: var(--muted); }
+:root[data-theme] .recharts-default-tooltip { background: var(--surface) !important; border-color: var(--border) !important; color: var(--text) !important; }
+:root[data-theme] .recharts-tooltip-label, :root[data-theme] .recharts-tooltip-item, :root[data-theme] .recharts-legend-item-text { color: var(--text) !important; }

@@ -98,7 +98,7 @@ Si usas un proxy inverso, dirige el dominio HTTPS al servicio `frontend`, que es
 
 Antes de habilitar el acceso desde Internet, crea la cuenta inicial, cambia `REGISTRATION_ENABLED=false` y recrea el backend con `docker compose up -d` (o vuelve a desplegar la pila en tu plataforma). La pantalla de acceso dejará de ofrecer el registro y la API rechazará nuevas altas. Si necesitas otra cuenta, habilita temporalmente el registro. Los datos permanecen en el volumen de PostgreSQL entre recreaciones.
 
-Las preferencias de moneda principal, locale y zona horaria se editan por usuario en la aplicación. Cada cuenta conserva su propia moneda; las transferencias entre monedas distintas se rechazan hasta que exista una política de conversión.
+Las preferencias de moneda principal, locale, zona horaria y paleta de colores se editan por usuario en la aplicación. Hay cuatro paletas: la clara actual, clara roja, oscura roja y oscura morada. Cada cuenta conserva su propia moneda; las transferencias entre monedas distintas se rechazan hasta que exista una política de conversión.
 
 ## Actualización
 

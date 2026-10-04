@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, clearToken, getToken, Settings } from './api/client'
 import AuthPage from './features/AuthPage'
@@ -35,6 +35,7 @@ export default function App() {
   const [section, setSection] = useState<Section>('dashboard')
   const me = useQuery({ queryKey: ['me'], queryFn: () => api<{ id: number; email: string }>('/auth/me'), enabled: !!token })
   const settings = useQuery({ queryKey: ['settings'], queryFn: () => api<Settings>('/settings'), enabled: !!token })
+  useEffect(() => { document.documentElement.dataset.theme = token ? settings.data?.theme || 'light-teal' : 'light-teal' }, [token, settings.data?.theme])
   if (!token) return <AuthPage onAuthenticated={(newToken) => updateToken(newToken)} />
 
   const logout = () => {
