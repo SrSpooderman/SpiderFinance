@@ -1,23 +1,22 @@
 import { ChangeEvent, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Account, api, getToken, ImportJob } from '../api/client'
+import { detectColumns } from './importMapping'
 
 const fields = [
   { id: 'date', label: 'Fecha *' }, { id: 'concept', label: 'Concepto *' },
   { id: 'amount', label: 'Importe *' }, { id: 'type', label: 'Tipo' },
-  { id: 'account_id', label: 'Cuenta' }, { id: 'source_account_id', label: 'Cuenta origen' },
-  { id: 'destination_account_id', label: 'Cuenta destino' }, { id: 'category_id', label: 'Categoría ID' },
+  { id: 'account_id', label: 'Cuenta ID (archivo antiguo)' },
+  { id: 'source_account', label: 'Cuenta origen' }, { id: 'destination_account', label: 'Cuenta destino' },
+  { id: 'category', label: 'Categoría' },
+  { id: 'source_account_id', label: 'Cuenta origen ID (archivo antiguo)' },
+  { id: 'destination_account_id', label: 'Cuenta destino ID (archivo antiguo)' },
+  { id: 'category_id', label: 'Categoría ID (archivo antiguo)' },
   { id: 'status', label: 'Estado' }, { id: 'notes', label: 'Notas' },
-  { id: 'payment_method', label: 'Método de pago' }, { id: 'external_id', label: 'ID externo' },
+  { id: 'payment_method', label: 'Método de pago' },
+  { id: 'is_fixed', label: 'Gasto fijo' }, { id: 'is_necessary', label: 'Necesario' },
+  { id: 'external_id', label: 'ID externo' },
 ]
-const aliases: Record<string, string[]> = {
-  date: ['fecha', 'date', 'fecha operacion'],
-  concept: ['concepto', 'description', 'descripcion', 'detalle', 'concept'],
-  amount: ['importe', 'amount', 'cantidad', 'monto'],
-  type: ['tipo', 'type'], account_id: ['cuenta', 'account_id'],
-  external_id: ['id externo', 'external_id', 'reference', 'referencia'],
-}
-
 export default function ImportExportPage() {
   const queryClient = useQueryClient()
   const [jobId, setJobId] = useState<number | null>(null)
@@ -45,7 +44,7 @@ export default function ImportExportPage() {
   const selectJob = (item: ImportJob) => {
     setJobId(item.id)
     setSheet(item.selected_sheet || item.sheet_names[0] || '')
-    setMapping(item.mapping || {})
+    setMapping(Object.keys(item.mapping || {}).length ? item.mapping : detectColumns(item.headers))
     setAccountId(item.default_account_id ? String(item.default_account_id) : '')
     setPositiveIsIncome(item.positive_is_income)
     setPreviewDirty(false)
@@ -63,7 +62,7 @@ export default function ImportExportPage() {
       }
       return response.json() as Promise<ImportJob>
     },
-    onSuccess: (item) => { refresh(); selectJob(item); setNotice('Archivo cargado. Asigna las columnas y previsualiza.') },
+    onSuccess: (item) => { refresh(); selectJob(item); setNotice('Archivo cargado. Revisa las columnas detectadas y previsualiza.') },
     onError: (error: Error) => setNotice(error.message),
   })
   const preview = useMutation({
@@ -99,12 +98,7 @@ export default function ImportExportPage() {
     event.target.value = ''
   }
   const autoMap = () => {
-    const detected: Record<string, string> = {}
-    for (const [field, names] of Object.entries(aliases)) {
-      const header = headers.find((value) => names.includes(value.toLowerCase().trim()))
-      if (header) detected[field] = header
-    }
-    setMapping(detected)
+    setMapping(detectColumns(headers))
     setPreviewDirty(true)
   }
   const download = async (format: 'json' | 'csv' | 'xlsx') => {
@@ -126,11 +120,11 @@ export default function ImportExportPage() {
   return <>
     <div className="page-heading"><div><span className="eyebrow">PORTABILIDAD</span><h2>Importar y exportar</h2></div></div>
     {notice && <div className="notice" role="status">{notice}</div>}
-    <section className="panel"><div className="panel-header"><div><span className="eyebrow">NUEVA IMPORTACIÓN</span><h3>Seleccionar archivo</h3></div></div><p>Máximo 5 MB y 5000 filas. Se admiten CSV UTF-8 y XLSX.</p><input type="file" accept=".csv,.xlsx" aria-label="Archivo para importar" disabled={upload.isPending} onChange={onFile} /></section>
+    <section className="panel"><div className="panel-header"><div><span className="eyebrow">NUEVA IMPORTACIÓN</span><h3>Seleccionar archivo</h3></div></div><p>Máximo 5 MB y 5000 filas. Se admiten CSV UTF-8, XLSX y JSON.</p><input type="file" accept=".csv,.xlsx,.json" aria-label="Archivo para importar" disabled={upload.isPending} onChange={onFile} /></section>
     {!!jobs.length && <section className="panel"><div className="panel-header"><div><span className="eyebrow">HISTORIAL</span><h3>Importaciones</h3></div></div><div className="table-scroll"><table><thead><tr><th>Archivo</th><th>Estado</th><th>Filas</th><th></th></tr></thead><tbody>{jobs.map((item) => <tr key={item.id}><td>{item.filename}</td><td>{item.status}</td><td>{item.total_rows}</td><td className="row-actions"><button onClick={() => selectJob(item)}>Abrir</button><button disabled={remove.isPending} onClick={() => { if (window.confirm('¿Eliminar el historial de este archivo? Los movimientos importados seguirán en la cuenta.')) remove.mutate(item.id) }}>Eliminar</button></td></tr>)}</tbody></table></div></section>}
     {job && <section className="panel"><div className="panel-header"><div><span className="eyebrow">MAPEO</span><h3>{job.filename}</h3></div></div>
       <div className="form-grid"><label>Hoja<select value={selectedSheet} onChange={(event) => { setSheet(event.target.value); setMapping({}); setPreviewDirty(true) }}>{job.sheet_names.map((name) => <option key={name} value={name}>{name}</option>)}</select></label><label>Cuenta predeterminada<select value={accountId} onChange={(event) => { setAccountId(event.target.value); setPreviewDirty(true) }}><option value="">Sin cuenta</option>{accounts.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.currency}</option>)}</select></label></div>
-      <p>Si no hay columna de tipo, el signo del importe determina ingreso o gasto. El importe negativo se guarda como gasto positivo.</p>
+      <p>Los archivos exportados relacionan cuentas por nombre y moneda, y categorías por ruta. Crea esas cuentas y categorías en el destino antes de importar. Si no hay tipo, el signo del importe determina ingreso o gasto.</p>
       <label className="checkbox"><input type="checkbox" checked={positiveIsIncome} onChange={(event) => { setPositiveIsIncome(event.target.checked); setPreviewDirty(true) }} /> Importe positivo = ingreso</label>
       <div className="form-actions"><button className="button secondary" onClick={autoMap}>Detectar columnas comunes</button></div>
       <div className="form-grid">{fields.map((field) => <label key={field.id}>{field.label}<select value={mapping[field.id] || ''} onChange={(event) => { const next = { ...mapping }; if (event.target.value) next[field.id] = event.target.value; else delete next[field.id]; setMapping(next); setPreviewDirty(true) }}><option value="">Sin asignar</option>{headers.map((header) => <option key={header} value={header}>{header}</option>)}</select></label>)}</div>

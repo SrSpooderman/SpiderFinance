@@ -2,6 +2,7 @@
 
 import csv
 import io
+import json
 import zipfile
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
@@ -14,6 +15,10 @@ MAX_FILE_BYTES = 5 * 1024 * 1024
 MAX_UNCOMPRESSED_BYTES = 20 * 1024 * 1024
 MAX_ROWS = 5000
 MAX_COLUMNS = 50
+PORTABLE_FIELDS = [
+    "date", "type", "concept", "amount", "source_account", "destination_account",
+    "category", "status", "notes", "payment_method", "is_fixed", "is_necessary",
+]
 
 
 def string_value(value) -> str:
@@ -56,6 +61,19 @@ def parse_file(contents: bytes, filename: str) -> dict[str, tuple[list[str], lis
     if len(contents) > MAX_FILE_BYTES:
         raise ValueError("El archivo supera 5 MB")
     suffix = Path(filename).suffix.lower()
+    if suffix == ".json":
+        try:
+            records = json.loads(contents.decode("utf-8-sig"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            raise ValueError("El JSON no es válido o no está codificado en UTF-8") from None
+        if not isinstance(records, list) or any(not isinstance(record, dict) for record in records):
+            raise ValueError("El JSON debe ser una lista de movimientos")
+        if len(records) > MAX_ROWS:
+            raise ValueError(f"El archivo supera {MAX_ROWS} filas")
+        headers = list(dict.fromkeys(key for record in records for key in record)) if records else PORTABLE_FIELDS
+        if not headers or len(headers) > MAX_COLUMNS or any(not isinstance(key, str) for key in headers):
+            raise ValueError("El JSON no contiene columnas válidas")
+        return {"JSON": sheet_rows([headers, *([record.get(key) for key in headers] for record in records)], "JSON")}
     if suffix == ".csv":
         try:
             content = contents.decode("utf-8-sig")
@@ -68,7 +86,7 @@ def parse_file(contents: bytes, filename: str) -> dict[str, tuple[list[str], lis
             dialect = csv.excel
         return {"CSV": sheet_rows(csv.reader(io.StringIO(content), dialect), "CSV")}
     if suffix != ".xlsx":
-        raise ValueError("Solo se admiten CSV y XLSX")
+        raise ValueError("Solo se admiten CSV, XLSX y JSON")
     try:
         with zipfile.ZipFile(io.BytesIO(contents)) as archive:
             if sum(item.file_size for item in archive.infolist()) > MAX_UNCOMPRESSED_BYTES:
@@ -118,9 +136,24 @@ def parse_amount(value: str) -> Decimal:
     return amount
 
 
-def parse_row(raw: dict, mapping: dict[str, str], default_account_id: int | None, positive_is_income: bool) -> dict:
+def parse_bool(value: str) -> bool:
+    normalized = value.strip().casefold()
+    if normalized in ("", "false", "0", "no"):
+        return False
+    if normalized in ("true", "1", "yes", "si", "sí"):
+        return True
+    raise ValueError(f"Valor booleano inválido: {value}")
+
+
+def unescape_spreadsheet(value: str) -> str:
+    return value[1:] if value.startswith(("'=", "'+", "'-", "'@")) else value
+
+
+def parse_row(raw: dict, mapping: dict[str, str], default_account_id: int | None,
+              positive_is_income: bool, spreadsheet_safe: bool = False) -> dict:
     def field(name: str) -> str:
-        return string_value(raw.get(mapping.get(name, ""), ""))
+        value = string_value(raw.get(mapping.get(name, ""), ""))
+        return unescape_spreadsheet(value) if spreadsheet_safe else value
 
     day = parse_date(field("date"))
     amount = parse_amount(field("amount"))
@@ -142,10 +175,12 @@ def parse_row(raw: dict, mapping: dict[str, str], default_account_id: int | None
     destination_id = int(destination) if destination else (selected if kind == "INCOME" else None)
     category = field("category_id")
     status = field("status").upper() or "CLEARED"
+    notes = field("notes")
+    payment_method = field("payment_method")
     return {
         "date": day.isoformat(), "type": kind, "source_account_id": source_id,
         "destination_account_id": destination_id, "category_id": int(category) if category else None,
         "concept": concept, "amount": str(abs(amount)), "status": status,
-        "notes": field("notes") or None, "payment_method": field("payment_method") or None,
-        "is_fixed": False, "is_necessary": False,
+        "notes": notes or None, "payment_method": payment_method or None,
+        "is_fixed": parse_bool(field("is_fixed")), "is_necessary": parse_bool(field("is_necessary")),
     }

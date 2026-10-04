@@ -14,18 +14,52 @@ from sqlalchemy import func, select
 from app.api.dependencies import CurrentUser, DbSession
 from app.api.schemas import TransactionIn
 from app.application.finance import account_balances, get_account, validate_transaction
-from app.application.importing import MAX_FILE_BYTES, parse_file, parse_row
-from app.infrastructure.models import ImportJob, ImportKey, ImportRow, InvestmentPosition, Transaction, User
+from app.application.importing import MAX_FILE_BYTES, PORTABLE_FIELDS, parse_file, parse_row, unescape_spreadsheet
+from app.infrastructure.models import Account, Category, ImportJob, ImportKey, ImportRow, InvestmentPosition, Transaction, User
 
 router = APIRouter(tags=["imports"])
 FIELDS = {
     "date", "concept", "amount", "type", "account_id", "source_account_id",
-    "destination_account_id", "category_id", "status", "notes", "payment_method", "external_id",
+    "destination_account_id", "category_id", "source_account", "destination_account",
+    "category", "status", "notes", "payment_method", "is_fixed", "is_necessary", "external_id",
 }
-EXPORT_FIELDS = [
-    "date", "type", "concept", "amount", "source_account_id", "destination_account_id",
-    "category_id", "status", "notes", "payment_method", "is_fixed", "is_necessary",
-]
+EXPORT_FIELDS = PORTABLE_FIELDS
+
+
+def account_label(account: Account) -> str:
+    return f"{account.name} [{account.currency}]"
+
+
+def category_label(category: Category, by_id: dict[int, Category]) -> str:
+    return f"{by_id[category.parent_id].name} / {category.name}" if category.parent_id else category.name
+
+
+def reference_index(db: DbSession, user_id: int):
+    accounts = list(db.scalars(select(Account).where(Account.user_id == user_id)))
+    categories = list(db.scalars(select(Category).where(Category.user_id == user_id)))
+    accounts_by_id = {item.id: item for item in accounts}
+    categories_by_id = {item.id: item for item in categories}
+    account_refs: dict[str, set[int]] = {}
+    category_refs: dict[str, set[int]] = {}
+    for item in accounts:
+        account_refs.setdefault(account_label(item), set()).add(item.id)
+    for item in accounts:
+        account_refs.setdefault(item.name, set()).add(item.id)
+    for item in categories:
+        category_refs.setdefault(category_label(item, categories_by_id), set()).add(item.id)
+    for item in categories:
+        if item.parent_id is not None:
+            category_refs.setdefault(item.name, set()).add(item.id)
+    return accounts_by_id, categories_by_id, account_refs, category_refs
+
+
+def resolve_reference(value: str, references: dict[str, set[int]], kind: str) -> int:
+    candidates = references.get(value, set())
+    if not candidates:
+        raise ValueError(f"{kind} no encontrada: {value}. Créala antes de importar o corrige el archivo")
+    if len(candidates) != 1:
+        raise ValueError(f"{kind} ambigua: {value}. Usa un nombre único en la instancia de destino")
+    return next(iter(candidates))
 
 
 class PreviewIn(BaseModel):
@@ -170,6 +204,8 @@ def preview_import(job_id: int, data: PreviewIn, user: CurrentUser, db: DbSessio
     job.total_rows = len(rows)
     job.imported_rows = 0
     job.status = "PREVIEWED"
+    _, _, account_refs, category_refs = reference_index(db, user.id)
+    spreadsheet_safe = job.file_type in ("csv", "xlsx")
     occurrences: dict[str, int] = {}
     keys = []
     for row in rows:
@@ -177,7 +213,20 @@ def preview_import(job_id: int, data: PreviewIn, user: CurrentUser, db: DbSessio
         row.error = None
         row.dedup_key = None
         try:
-            raw_data = parse_row(row.raw, data.mapping, data.default_account_id, data.positive_is_income)
+            raw_data = parse_row(row.raw, data.mapping, data.default_account_id,
+                                 data.positive_is_income, spreadsheet_safe)
+            for field, target in (("source_account", "source_account_id"),
+                                  ("destination_account", "destination_account_id")):
+                value = row.raw.get(data.mapping.get(field, ""), "").strip()
+                if value:
+                    if spreadsheet_safe:
+                        value = unescape_spreadsheet(value)
+                    raw_data[target] = resolve_reference(value, account_refs, "Cuenta")
+            value = row.raw.get(data.mapping.get("category", ""), "").strip()
+            if value:
+                if spreadsheet_safe:
+                    value = unescape_spreadsheet(value)
+                raw_data["category_id"] = resolve_reference(value, category_refs, "Categoría")
             parsed = TransactionIn.model_validate(raw_data)
             values = parsed.model_dump()
             validate_transaction(db, user.id, values)
@@ -272,17 +321,21 @@ def safe_spreadsheet(value):
 
 @router.get("/exports/transactions")
 def export_transactions(user: CurrentUser, db: DbSession, format: Literal["json", "csv", "xlsx"] = "csv"):
+    accounts_by_id, categories_by_id, _, _ = reference_index(db, user.id)
     movements = list(db.scalars(select(Transaction).where(
         Transaction.user_id == user.id
     ).order_by(Transaction.date, Transaction.id)))
     rows = []
     for movement in movements:
         rows.append({
-            field: (
-                getattr(movement, field).isoformat() if field == "date"
-                else str(getattr(movement, field)) if field == "amount"
-                else getattr(movement, field)
-            ) for field in EXPORT_FIELDS
+            "date": movement.date.isoformat(), "type": movement.type,
+            "concept": movement.concept, "amount": str(movement.amount),
+            "source_account": account_label(accounts_by_id[movement.source_account_id]) if movement.source_account_id else None,
+            "destination_account": account_label(accounts_by_id[movement.destination_account_id]) if movement.destination_account_id else None,
+            "category": category_label(categories_by_id[movement.category_id], categories_by_id) if movement.category_id else None,
+            "status": movement.status, "notes": movement.notes,
+            "payment_method": movement.payment_method,
+            "is_fixed": movement.is_fixed, "is_necessary": movement.is_necessary,
         })
     if format == "json":
         content = json.dumps(rows, ensure_ascii=False, indent=2).encode()
