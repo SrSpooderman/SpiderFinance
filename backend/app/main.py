@@ -19,6 +19,11 @@ for router in (auth.router, accounts.router, categories.router, transactions.rou
     app.include_router(router, prefix="/api/v1")
 
 
+@app.get("/api/", include_in_schema=False)
+def api_root() -> dict[str, str]:
+    return {"status": "ok"}
+
+
 @app.get("/health", tags=["health"])
 def health() -> dict[str, str]:
     with engine.connect() as connection:

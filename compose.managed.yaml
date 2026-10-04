@@ -1,3 +1,5 @@
+# Para gestores que enrutan al puerto interno del contenedor frontend.
+# No publica puertos del host; asigna el dominio completo a frontend:80.
 services:
   postgres:
     image: postgres:16-alpine
@@ -5,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-spiderfinance}
       POSTGRES_USER: ${POSTGRES_USER:-spiderfinance}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env and set POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the deployment environment}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -19,8 +21,8 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-spiderfinance}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-spiderfinance}
-      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in the deployment environment}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
       REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
     depends_on:
       postgres:
@@ -37,8 +39,8 @@ services:
     restart: unless-stopped
     environment:
       API_UPSTREAM: ${API_UPSTREAM:-http://backend:8000}
-    ports:
-      - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-8080}:80"
+    expose:
+      - "80"
     depends_on:
       backend:
         condition: service_healthy

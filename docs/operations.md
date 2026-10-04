@@ -24,4 +24,6 @@ Genera claves distintas para cada instalación y no publiques los puertos de Pos
 
 Si expones la aplicación a Internet, dirige un dominio HTTPS mediante un proxy inverso al frontend, en su puerto interno `80`. El frontend reenvía `/api` al backend por la red de Compose: la API es accesible a través del dominio aunque su contenedor no tenga un puerto publicado. `CORS_ORIGINS` solo afecta a clientes de la API alojados en otro origen; no protege la API ni es necesario cambiarlo para el frontend integrado.
 
+Si el gestor enruta directamente a contenedores, usa `compose.managed.yaml` y asigna el dominio completo solo a `frontend:80`. Si cambias el destino del backend, ajusta `API_UPSTREAM` a un origen HTTP accesible desde el frontend, sin ruta final, y vuelve a desplegar. Consulta [la guía de despliegue](deployment.md) para instalarlo también con un proxy en el servidor o con servicios separados.
+
 Antes de publicar el dominio, crea la cuenta inicial con `REGISTRATION_ENABLED=true`, cambia la variable a `false` y recrea el backend. Comprueba que `GET /api/v1/auth/config` devuelve `registration_enabled: false` y que la pantalla ya no ofrece el registro. Nginx no reenvía `/docs`, `/redoc` ni `/openapi.json` desde el dominio público.

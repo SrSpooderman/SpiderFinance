@@ -1,6 +1,6 @@
 # SpiderFinance
 
-Aplicación de finanzas personales para instalar en tu equipo.
+Aplicación de finanzas personales autoalojada.
 
 ## Instalar y ejecutar
 
@@ -23,6 +23,12 @@ docker compose down
 ```
 
 Los datos permanecen en el volumen de PostgreSQL entre arranques.
+
+## Publicar con cualquier gestor
+
+La aplicación usa un solo origen: el frontend se sirve en `/` y la API en `/api/`. El navegador solicita rutas relativas como `/api/v1/auth/config`; el contenedor frontend reenvía `/api/` al backend. El destino se configura en tiempo de ejecución con `API_UPSTREAM` (por defecto `http://backend:8000`).
+
+Para un proxy inverso instalado en el servidor, usa `compose.yaml` y dirige el dominio al puerto local `APP_PORT` (por defecto `127.0.0.1:8080`). Si tu gestor enruta directamente a contenedores, usa `compose.managed.yaml` y dirige el dominio completo a `frontend:80`. También puedes desplegar los servicios por separado o servir los archivos estáticos con tu propio proxy. Consulta [la guía de despliegue](docs/deployment.md) para las variables, rutas y comprobaciones de cada opción.
 
 ## Desarrollar
 
