@@ -27,6 +27,8 @@ def test_user_can_change_password_and_old_sessions_stop_working(client, auth):
 
 def test_admin_creates_users_and_resets_passwords_with_registration_closed(client, auth, monkeypatch):
     gateway = {"X-SpiderFinance-Admin-Gateway": "local"}
+    monkeypatch.setattr(settings, "superuser_email", "")
+    monkeypatch.setattr(settings, "superuser_password", "")
     assert client.post("/api/v1/admin/login", json={
         "email": "admin@example.com", "password": "admin-password-long-enough",
     }).status_code == 404
