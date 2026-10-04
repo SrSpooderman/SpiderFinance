@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, clearToken, getToken, Settings } from './api/client'
+import { api, clearToken, getToken, ProfilePhoto, Settings } from './api/client'
 import AuthPage from './features/AuthPage'
 import DashboardPage from './features/DashboardPage'
 import AccountsPage from './features/AccountsPage'
@@ -13,6 +13,7 @@ import BudgetsPage from './features/BudgetsPage'
 import InvestmentsPage from './features/InvestmentsPage'
 import ImportExportPage from './features/ImportExportPage'
 import ScenariosPage from './features/ScenariosPage'
+import TopbarClock from './features/TopbarClock'
 
 type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'investments' | 'imports' | 'scenarios' | 'settings'
 const sections: { id: Section; label: string; icon: string }[] = [
@@ -34,6 +35,7 @@ export default function App() {
   const [token, updateToken] = useState(getToken())
   const [section, setSection] = useState<Section>('dashboard')
   const me = useQuery({ queryKey: ['me'], queryFn: () => api<{ id: number; email: string }>('/auth/me'), enabled: !!token })
+  const profilePhoto = useQuery({ queryKey: ['profile-photo'], queryFn: () => api<ProfilePhoto>('/auth/profile-photo'), enabled: !!token })
   const settings = useQuery({ queryKey: ['settings'], queryFn: () => api<Settings>('/settings'), enabled: !!token })
   useEffect(() => { document.documentElement.dataset.theme = token ? settings.data?.theme || 'light-teal' : 'light-teal' }, [token, settings.data?.theme])
   if (!token) return <AuthPage onAuthenticated={(newToken) => updateToken(newToken)} />
@@ -46,20 +48,20 @@ export default function App() {
   const title = sections.find((item) => item.id === section)?.label
   return <div className="app-shell">
     <aside className="sidebar">
-      <div className="brand"><span className="brand-mark">S</span><span>Spider<span className="brand-accent">Finance</span></span></div>
+      <div className="brand"><span className="brand-mark"><img src="/spider-coins.svg" alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div>
       <div className="nav-caption">ESPACIO PERSONAL</div>
       <nav aria-label="Principal">
         {sections.map((item) => <button key={item.id} className={`nav-item ${section === item.id ? 'active' : ''}`} onClick={() => setSection(item.id)}>
           <span className="nav-icon" aria-hidden="true">{item.icon}</span>{item.label}
         </button>)}
       </nav>
-      <div className="sidebar-bottom"><div className="avatar">{me.data?.email?.[0]?.toUpperCase() || 'U'}</div>
+      <div className="sidebar-bottom"><div className="avatar">{profilePhoto.data?.data_url ? <img src={profilePhoto.data.data_url} alt="" /> : me.data?.email?.[0]?.toUpperCase() || 'U'}</div>
         <div className="account-label"><strong>Mi espacio</strong><small>{me.data?.email || 'Cargando...'}</small></div>
         <button className="icon-button" title="Cerrar sesión" onClick={logout}>↪</button>
       </div>
     </aside>
     <div className="main-shell">
-      <header className="topbar"><div><span className="eyebrow">FINANZAS PERSONALES</span><h1>{title}</h1></div><div className="topbar-date">{new Intl.DateTimeFormat(settings.data?.locale || 'es-ES', { timeZone: settings.data?.timezone || 'Europe/Madrid', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}</div></header>
+      <header className="topbar"><div><span className="eyebrow">FINANZAS PERSONALES</span><h1>{title}</h1></div><TopbarClock settings={settings.data} /></header>
       <main className="content">
         {section === 'dashboard' && <DashboardPage onNavigate={setSection} />}
         {section === 'transactions' && <TransactionsPage />}

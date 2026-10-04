@@ -1,0 +1,33 @@
+.topbar-clock {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-soft);
+  color: var(--strong);
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+
+.topbar-clock-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
+}
+
+.topbar-clock-icon svg { width: 22px; height: 22px; }
+.topbar-clock-copy { display: grid; gap: 1px; }
+.topbar-clock-copy time { font: 800 17px/1.1 Manrope, system-ui, sans-serif; }
+.topbar-clock-copy small { color: var(--muted); font-size: 10px; text-transform: capitalize; }
+
+@media (max-width: 750px) {
+  .topbar-clock { padding: 8px; }
+  .topbar-clock-icon { width: 30px; height: 30px; }
+  .topbar-clock-copy small { display: none; }
+}

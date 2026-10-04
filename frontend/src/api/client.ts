@@ -20,6 +20,7 @@ export type Dashboard = {
 }
 export type Theme = 'light-teal' | 'light-red' | 'dark-red' | 'dark-purple'
 export type Settings = { currency: string; locale: string; timezone: string; theme: Theme }
+export type ProfilePhoto = { data_url: string | null }
 export type IncomeSource = {
   id: number; name: string; amount: string; account_id: number; day_rule: 'FIXED_DAY' | 'LAST_DAY_OF_MONTH' | 'FIRST_BUSINESS_DAY'
   day_of_month: number | null; starts_on: string; ends_on: string | null; active: boolean; is_primary: boolean
@@ -134,7 +135,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   const response = await fetch(`/api/v1${path}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
       ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
       ...options.headers,
     },

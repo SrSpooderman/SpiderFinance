@@ -1,3 +1,28 @@
+.profile-photo-settings {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.avatar.profile-photo-preview {
+  width: 68px;
+  height: 68px;
+  flex: none;
+  border-radius: 50%;
+  font-size: 25px;
+  color: #fff;
+}
+
+.profile-photo-details { min-width: 0; }
+.profile-photo-details > strong { display: block; color: var(--strong); font-size: 13px; }
+.profile-photo-details > small { display: block; margin: 3px 0 9px; color: var(--muted); font-size: 11px; }
+.profile-photo-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.profile-photo-actions .button { padding: 8px 10px; }
+.profile-photo-input { display: none; }
+
 .settings-field-title {
   display: block;
   margin-bottom: .65rem;

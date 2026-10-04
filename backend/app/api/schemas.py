@@ -31,6 +31,10 @@ class UserOut(ORMModel):
     email: EmailStr
 
 
+class ProfilePhotoOut(BaseModel):
+    data_url: str | None
+
+
 class SettingsOut(ORMModel):
     currency: str
     locale: str

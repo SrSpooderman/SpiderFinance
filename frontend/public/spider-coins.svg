@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title">
+  <title id="title">SpiderFinance: araña geométrica sobre monedas</title>
+
+  <polygon points="14,2 82,2 94,14 94,82 82,94 14,94 2,82 2,14" fill="#111318"/>
+
+  <g fill="#D73840">
+    <polygon points="42,32 29,22 16,22 13,27 28,27 39,38"/>
+    <polygon points="39,38 25,34 11,43 13,49 26,40 38,45"/>
+    <polygon points="39,47 25,49 14,61 18,66 27,54 40,53"/>
+    <polygon points="42,55 32,62 27,73 32,76 36,66 44,61"/>
+
+    <polygon points="54,32 67,22 80,22 83,27 68,27 57,38"/>
+    <polygon points="57,38 71,34 85,43 83,49 70,40 58,45"/>
+    <polygon points="57,47 71,49 82,61 78,66 69,54 56,53"/>
+    <polygon points="54,55 64,62 69,73 64,76 60,66 52,61"/>
+  </g>
+
+  <polygon points="48,22 55,29 57,38 53,45 48,48 43,45 39,38 41,29" fill="#ED454B"/>
+  <polygon points="48,45 56,50 59,59 48,67 37,59 40,50" fill="#BB2732"/>
+
+  <g fill="#A77935">
+    <polygon points="32,70 36,73 60,73 64,70 64,74 60,77 36,77 32,74"/>
+    <polygon points="32,77 36,80 60,80 64,77 64,81 60,84 36,84 32,81"/>
+    <polygon points="32,84 36,87 60,87 64,84 64,88 60,91 36,91 32,88"/>
+  </g>
+  <g fill="#E2BB6B">
+    <polygon points="36,67 60,67 64,70 60,73 36,73 32,70"/>
+    <polygon points="36,74 60,74 64,77 60,80 36,80 32,77"/>
+    <polygon points="36,81 60,81 64,84 60,87 36,87 32,84"/>
+  </g>
+</svg>

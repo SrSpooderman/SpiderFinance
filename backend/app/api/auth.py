@@ -1,13 +1,16 @@
-from fastapi import APIRouter, HTTPException
+from base64 import b64encode
+
+from fastapi import APIRouter, File, HTTPException, Response, UploadFile
 from sqlalchemy import select
 
 from app.api.dependencies import CurrentUser, DbSession
-from app.api.schemas import LoginIn, RegisterIn, SettingsOut, SettingsPatch, TokenOut, UserOut
+from app.api.schemas import LoginIn, ProfilePhotoOut, RegisterIn, SettingsOut, SettingsPatch, TokenOut, UserOut
 from app.core.config import settings
 from app.core.security import create_token, hash_password, verify_password
-from app.infrastructure.models import Category, User, UserSettings
+from app.infrastructure.models import Category, User, UserProfilePhoto, UserSettings
 
 router = APIRouter(tags=["auth"])
+MAX_PROFILE_PHOTO_BYTES = 2 * 1024 * 1024
 
 DEFAULT_CATEGORIES = (
     "Alimentación", "Restaurantes", "Transporte", "Ocio", "Ropa", "Tecnología",
@@ -48,6 +51,56 @@ def login(data: LoginIn, db: DbSession) -> TokenOut:
 @router.get("/auth/me", response_model=UserOut)
 def me(user: CurrentUser) -> User:
     return user
+
+
+def photo_type(data: bytes) -> str | None:
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if data.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
+
+def photo_out(photo: UserProfilePhoto | None) -> ProfilePhotoOut:
+    if photo is None:
+        return ProfilePhotoOut(data_url=None)
+    encoded = b64encode(photo.image_data).decode("ascii")
+    return ProfilePhotoOut(data_url=f"data:{photo.content_type};base64,{encoded}")
+
+
+@router.get("/auth/profile-photo", response_model=ProfilePhotoOut)
+def get_profile_photo(user: CurrentUser, db: DbSession, response: Response) -> ProfilePhotoOut:
+    response.headers["Cache-Control"] = "private, no-store"
+    return photo_out(db.get(UserProfilePhoto, user.id))
+
+
+@router.put("/auth/profile-photo", response_model=ProfilePhotoOut)
+async def put_profile_photo(user: CurrentUser, db: DbSession, photo: UploadFile = File(...)) -> ProfilePhotoOut:
+    data = await photo.read(MAX_PROFILE_PHOTO_BYTES + 1)
+    if len(data) > MAX_PROFILE_PHOTO_BYTES:
+        raise HTTPException(413, "La foto no puede superar los 2 MB")
+    content_type = photo_type(data)
+    if content_type is None:
+        raise HTTPException(422, "Usa una imagen PNG, JPEG o WebP")
+    item = db.get(UserProfilePhoto, user.id)
+    if item is None:
+        item = UserProfilePhoto(user_id=user.id, content_type=content_type, image_data=data)
+        db.add(item)
+    else:
+        item.content_type = content_type
+        item.image_data = data
+    db.commit()
+    return photo_out(item)
+
+
+@router.delete("/auth/profile-photo", status_code=204)
+def delete_profile_photo(user: CurrentUser, db: DbSession) -> None:
+    item = db.get(UserProfilePhoto, user.id)
+    if item is not None:
+        db.delete(item)
+        db.commit()
 
 
 @router.get("/settings", response_model=SettingsOut, tags=["settings"])

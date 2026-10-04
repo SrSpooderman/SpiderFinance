@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, LargeBinary, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -21,3 +21,11 @@ class UserSettings(Base):
     locale: Mapped[str] = mapped_column(String(32), default="es-ES")
     timezone: Mapped[str] = mapped_column(String(64), default="Europe/Madrid")
     theme: Mapped[str] = mapped_column(String(20), default="light-teal")
+
+
+class UserProfilePhoto(Base):
+    __tablename__ = "user_profile_photos"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    content_type: Mapped[str] = mapped_column(String(20))
+    image_data: Mapped[bytes] = mapped_column(LargeBinary)
