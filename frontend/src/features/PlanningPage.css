@@ -2,6 +2,45 @@
   margin-top: 2rem;
 }
 
+.planning-month {
+  border-top: 1px solid #e9eeee;
+}
+
+.planning-month summary {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .9rem .25rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.planning-month summary::-webkit-details-marker { display: none; }
+.planning-month summary::before { content: '▸'; color: #268270; }
+.planning-month[open] summary::before { content: '▾'; }
+.planning-month-name { text-transform: capitalize; font-weight: 700; color: #2a3d48; }
+.planning-month-count { color: #87959d; font-size: 12px; }
+
+.planning-link-row > td { padding: 0 10px 15px; }
+.planning-link-form {
+  min-width: 320px;
+  padding: 18px;
+  border: 1px solid #b5d7cb;
+  border-radius: 10px;
+  background: #f7fbf9;
+}
+.planning-link-form .panel-header { margin-bottom: 8px; }
+.planning-link-form p { font-size: 12px; }
+.planning-link-form .inline-form label { flex: 1; min-width: 0; }
+.planning-link-form .inline-form select {
+  width: 100%;
+  border: 1px solid #dce5e6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  color: #223b45;
+}
+
 .planning-tabs {
   display: flex;
   flex-wrap: wrap;

@@ -96,3 +96,49 @@ def test_planning_isolation_and_validation(client, auth):
     created = client.post("/api/v1/scheduled-expenses", headers=auth, json=payload).json()
     assert client.patch(f"/api/v1/scheduled-expenses/{created['id']}", headers=auth, json={"status": "PAID"}).status_code == 422
     assert client.patch(f"/api/v1/scheduled-expenses/{created['id']}", headers=other_auth, json={"name": "Otro"}).status_code == 404
+
+
+def test_delete_planning_rules_preserves_real_movements(client, auth):
+    bank = account(client, auth)
+    income = client.post("/api/v1/income-sources", headers=auth, json={
+        "name": "Nómina", "amount": "2000.00", "account_id": bank,
+        "day_rule": "LAST_DAY_OF_MONTH", "starts_on": "2026-01-01",
+    }).json()
+    recurring = client.post("/api/v1/recurring-expenses", headers=auth, json={
+        "name": "Alquiler", "amount": "600.00", "account_id": bank,
+        "frequency": "MONTHLY", "starts_on": "2026-01-31",
+    }).json()
+    scheduled = client.post("/api/v1/scheduled-expenses", headers=auth, json={
+        "name": "Seguro", "amount": "90.00", "account_id": bank, "due_date": "2026-02-15",
+    }).json()
+    debt = client.post("/api/v1/debts", headers=auth, json={
+        "name": "Préstamo", "principal": "100.00", "installment_amount": "40.00",
+        "account_id": bank, "starts_on": "2026-01-01", "due_day": 15,
+    }).json()
+    savings_rule = client.post("/api/v1/savings-rules", headers=auth, json={
+        "name": "Guardar", "income_source_id": income["id"], "mode": "PERCENT", "value": "10.00",
+    })
+    assert savings_rule.status_code == 201, savings_rule.text
+
+    linked = [
+        ("income-sources", income["id"], movement(client, auth, "INCOME", bank, "2000.00"), "receipts", {"due_date": "2026-02-28"}),
+        ("recurring-expenses", recurring["id"], movement(client, auth, "EXPENSE", bank, "600.00"), "payments", {"due_date": "2026-02-28"}),
+        ("scheduled-expenses", scheduled["id"], movement(client, auth, "EXPENSE", bank, "90.00"), "pay", {}),
+        ("debts", debt["id"], movement(client, auth, "EXPENSE", bank, "40.00"), "payments", {}),
+    ]
+    for path, item_id, transaction_id, link_path, body in linked:
+        response = client.post(f"/api/v1/{path}/{item_id}/{link_path}", headers=auth, json={
+            "transaction_id": transaction_id, **body,
+        })
+        assert response.status_code in (200, 201), response.text
+
+    other = client.post("/api/v1/auth/register", json={"email": "other-delete@example.com", "password": "another-strong-password"})
+    other_auth = {"Authorization": f"Bearer {other.json()['access_token']}"}
+    for path, item_id, transaction_id, _, _ in linked:
+        assert client.delete(f"/api/v1/{path}/{item_id}", headers=other_auth).status_code == 404
+        assert client.delete(f"/api/v1/{path}/{item_id}", headers=auth).status_code == 204
+        assert client.get(f"/api/v1/{path}", headers=auth).json() == []
+        assert client.get(f"/api/v1/transactions/{transaction_id}", headers=auth).status_code == 200
+        assert client.delete(f"/api/v1/{path}/{item_id}", headers=auth).status_code == 404
+    assert client.get("/api/v1/planning-links", headers=auth).json() == []
+    assert client.get("/api/v1/savings-rules", headers=auth).json() == []

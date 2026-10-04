@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import CurrentUser, DbSession
@@ -15,7 +15,7 @@ from app.application.calendar import income_dates, monthly_dates, recurring_date
 from app.application.finance import get_account, get_category, user_today
 from app.infrastructure.models import (
     Account, Debt, DebtPayment, IncomeReceipt, IncomeSource, RecurringExpense,
-    RecurringPayment, ScheduledExpense, Transaction,
+    RecurringPayment, SavingsRule, ScheduledExpense, Transaction,
 )
 
 router = APIRouter(tags=["planning"])
@@ -136,6 +136,15 @@ def patch_income_source(item_id: int, data: IncomeSourcePatch, user: CurrentUser
     return item
 
 
+@router.delete("/income-sources/{item_id}", status_code=204)
+def delete_income_source(item_id: int, user: CurrentUser, db: DbSession):
+    item = owned(db, IncomeSource, user.id, item_id)
+    db.execute(delete(IncomeReceipt).where(IncomeReceipt.user_id == user.id, IncomeReceipt.source_id == item_id))
+    db.execute(delete(SavingsRule).where(SavingsRule.user_id == user.id, SavingsRule.income_source_id == item_id))
+    db.delete(item)
+    db.commit()
+
+
 @router.post("/income-sources/{item_id}/receipts", status_code=201)
 def link_income_receipt(item_id: int, data: OccurrenceLinkIn, user: CurrentUser, db: DbSession):
     item = owned(db, IncomeSource, user.id, item_id)
@@ -182,6 +191,14 @@ def patch_recurring_expense(item_id: int, data: RecurringExpensePatch, user: Cur
     db.commit()
     db.refresh(item)
     return item
+
+
+@router.delete("/recurring-expenses/{item_id}", status_code=204)
+def delete_recurring_expense(item_id: int, user: CurrentUser, db: DbSession):
+    item = owned(db, RecurringExpense, user.id, item_id)
+    db.execute(delete(RecurringPayment).where(RecurringPayment.user_id == user.id, RecurringPayment.expense_id == item_id))
+    db.delete(item)
+    db.commit()
 
 
 @router.post("/recurring-expenses/{item_id}/payments", status_code=201)
@@ -239,6 +256,13 @@ def patch_scheduled_expense(item_id: int, data: ScheduledExpensePatch, user: Cur
     return item
 
 
+@router.delete("/scheduled-expenses/{item_id}", status_code=204)
+def delete_scheduled_expense(item_id: int, user: CurrentUser, db: DbSession):
+    item = owned(db, ScheduledExpense, user.id, item_id)
+    db.delete(item)
+    db.commit()
+
+
 @router.post("/scheduled-expenses/{item_id}/pay", response_model=ScheduledExpenseOut)
 def pay_scheduled_expense(item_id: int, data: TransactionLinkIn, user: CurrentUser, db: DbSession):
     item = owned(db, ScheduledExpense, user.id, item_id)
@@ -294,6 +318,14 @@ def patch_debt(item_id: int, data: DebtPatch, user: CurrentUser, db: DbSession):
     db.commit()
     db.refresh(item)
     return debt_out(db, item)
+
+
+@router.delete("/debts/{item_id}", status_code=204)
+def delete_debt(item_id: int, user: CurrentUser, db: DbSession):
+    item = owned(db, Debt, user.id, item_id)
+    db.execute(delete(DebtPayment).where(DebtPayment.user_id == user.id, DebtPayment.debt_id == item_id))
+    db.delete(item)
+    db.commit()
 
 
 @router.post("/debts/{item_id}/payments", response_model=DebtOut, status_code=201)

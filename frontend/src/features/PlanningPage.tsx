@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, Fragment, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Account, api, Category, Debt, IncomeSource, money, MovementPage, PlanningLink,
@@ -35,6 +35,7 @@ export default function PlanningPage() {
   const [draft, setDraft] = useState<Draft | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [payingEvent, setPayingEvent] = useState<UpcomingEvent | null>(null)
+  const [openMonths, setOpenMonths] = useState<Record<string, boolean>>({})
   const [transactionId, setTransactionId] = useState('')
   const [notice, setNotice] = useState('')
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: () => api<Settings>('/settings') })
@@ -52,6 +53,12 @@ export default function PlanningPage() {
   const account = (id: number) => accounts.find((item) => item.id === id)
   const selected = { income, recurring, scheduled, debt: debts }[tab] as Item[]
   const path = tabs.find((item) => item.id === tab)!.path
+  const monthlyEvents = upcoming.reduce((months, event) => {
+    const month = event.date.slice(0, 7)
+    months.set(month, [...(months.get(month) || []), event])
+    return months
+  }, new Map<string, UpcomingEvent[]>())
+  const firstOpenMonth = monthlyEvents.has(today.slice(0, 7)) ? today.slice(0, 7) : monthlyEvents.keys().next().value
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['planning'] })
     queryClient.invalidateQueries({ queryKey: ['upcoming'] })
@@ -124,6 +131,19 @@ export default function PlanningPage() {
     onSuccess: () => { refresh(); setNotice('Estado actualizado.') },
     onError: (error: Error) => setNotice(error.message),
   })
+  const remove = useMutation({
+    mutationFn: ({ section, id }: { section: Tab; id: number }) =>
+      api<void>(`/${tabs.find((item) => item.id === section)!.path}/${id}`, { method: 'DELETE' }),
+    onSuccess: (_, deleted) => {
+      refresh()
+      queryClient.invalidateQueries({ queryKey: ['savings'] })
+      queryClient.invalidateQueries({ queryKey: ['forecast'] })
+      if (tab === deleted.section && editingId === deleted.id) { setDraft(null); setEditingId(null) }
+      setPayingEvent(null)
+      setNotice('Regla eliminada. Los movimientos reales se conservan.')
+    },
+    onError: (error: Error) => setNotice(error.message),
+  })
   const link = useMutation({
     mutationFn: async () => {
       if (!payingEvent || !transactionId) throw new Error('Selecciona un movimiento confirmado')
@@ -169,15 +189,27 @@ export default function PlanningPage() {
     {notice && <div className="notice" role="status">{notice}</div>}
     <section className="panel">
       <div className="panel-header"><div><span className="eyebrow">CALENDARIO</span><h3>Próximos 90 días</h3></div></div>
-      {upcoming.length ? <div className="table-scroll"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Cuenta</th><th>Tipo</th><th className="right">Importe previsto</th><th></th></tr></thead><tbody>
-        {upcoming.map((event) => <tr key={`${event.kind}-${event.source_id}-${event.date}`}><td>{event.date.split('-').reverse().join('/')}{event.overdue && <small className="table-note">Vencido</small>}</td><td><strong>{event.name}</strong></td><td>{account(event.account_id)?.name || '—'}</td><td>{eventLabels[event.kind]}</td><td className="right amount">{event.kind === 'INCOME' ? '+' : '−'}{formatMoney(event.amount, event.currency)}</td><td className="row-actions"><button onClick={() => { setPayingEvent(event); setTransactionId('') }}>Vincular pago</button></td></tr>)}
-      </tbody></table></div> : <div className="empty">No hay vencimientos previstos en este periodo.</div>}
+      {upcoming.length ? [...monthlyEvents].map(([month, events]) =>
+        <details className="planning-month" key={month} open={openMonths[month] ?? month === firstOpenMonth} onToggle={(event) => {
+          const isOpen = event.currentTarget.open
+          setOpenMonths((current) => current[month] === isOpen ? current : { ...current, [month]: isOpen })
+        }}>
+          <summary><span className="planning-month-name">{new Intl.DateTimeFormat(settings?.locale || 'es-ES', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${month}-01T12:00:00Z`))}</span><span className="planning-month-count">{events.length} {events.length === 1 ? 'vencimiento' : 'vencimientos'}</span></summary>
+          <div className="table-scroll"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Cuenta</th><th>Tipo</th><th className="right">Importe previsto</th><th></th></tr></thead><tbody>
+            {events.map((event) => {
+              const isPaying = payingEvent?.kind === event.kind && payingEvent.source_id === event.source_id && payingEvent.date === event.date
+              return <Fragment key={`${event.kind}-${event.source_id}-${event.date}`}>
+                <tr><td>{event.date.split('-').reverse().join('/')}{event.overdue && <small className="table-note">Vencido</small>}</td><td><strong>{event.name}</strong></td><td>{account(event.account_id)?.name || '—'}</td><td>{eventLabels[event.kind]}</td><td className="right amount">{event.kind === 'INCOME' ? '+' : '−'}{formatMoney(event.amount, event.currency)}</td><td className="row-actions"><button aria-expanded={isPaying} onClick={() => { setPayingEvent(isPaying ? null : event); setTransactionId('') }}>{event.kind === 'INCOME' ? 'Vincular cobro' : 'Vincular pago'}</button></td></tr>
+                {isPaying && <tr className="planning-link-row"><td colSpan={6}><div className="planning-link-form"><div className="panel-header"><h3>Vincular {event.name}</h3><button className="icon-button" aria-label="Cerrar vínculo" onClick={() => setPayingEvent(null)}>×</button></div>
+                  <p>Selecciona un movimiento confirmado de la cuenta {account(event.account_id)?.name}. El importe real puede diferir del previsto.</p>
+                  <div className="inline-form"><label>Movimiento<select value={transactionId} onChange={(selection) => setTransactionId(selection.target.value)}><option value="">Selecciona un movimiento</option>{availableMovements.map((item) => <option key={item.id} value={item.id}>{item.date} · {item.concept} · {formatMoney(item.amount, event.currency)}</option>)}</select></label><button className="button primary" disabled={!transactionId || link.isPending} onClick={() => link.mutate()}>Vincular</button></div>
+                  {!availableMovements.length && <p className="table-note">Registra primero el movimiento real en «Movimientos» y vuelve aquí.</p>}
+                </div></td></tr>}
+              </Fragment>
+            })}
+          </tbody></table></div>
+        </details>) : <div className="empty">No hay vencimientos previstos en este periodo.</div>}
     </section>
-    {payingEvent && <section className="panel form-panel"><div className="panel-header"><h3>Vincular {payingEvent.name}</h3><button className="icon-button" onClick={() => setPayingEvent(null)}>×</button></div>
-      <p>Selecciona un movimiento confirmado de la cuenta {account(payingEvent.account_id)?.name}. El importe real puede diferir del previsto.</p>
-      <div className="inline-form"><label>Movimiento<select value={transactionId} onChange={(event) => setTransactionId(event.target.value)}><option value="">Selecciona un movimiento</option>{availableMovements.map((item) => <option key={item.id} value={item.id}>{item.date} · {item.concept} · {formatMoney(item.amount, payingEvent.currency)}</option>)}</select></label><button className="button primary" disabled={!transactionId || link.isPending} onClick={() => link.mutate()}>Vincular</button></div>
-      {!availableMovements.length && <p className="table-note">Registra primero el movimiento real en «Movimientos» y vuelve aquí.</p>}
-    </section>}
     <div className="panel-header planning-header"><div><span className="eyebrow">TUS REGLAS</span><h3>Ingresos y obligaciones</h3></div><button className="button primary" onClick={() => open()}>+ Añadir</button></div>
     <div className="planning-tabs" role="tablist" aria-label="Tipo de planificación">{tabs.map((item) => <button key={item.id} role="tab" aria-selected={tab === item.id} className={tab === item.id ? 'active' : ''} onClick={() => { setTab(item.id); setDraft(null); setEditingId(null) }}>{item.label}</button>)}</div>
     {draft && <section className="panel form-panel"><div className="panel-header"><h3>{editingId ? 'Editar' : 'Añadir'} {tabs.find((item) => item.id === tab)?.label.toLowerCase()}</h3><button className="icon-button" onClick={() => setDraft(null)}>×</button></div>
@@ -202,7 +234,7 @@ export default function PlanningPage() {
         const detail = 'day_rule' in item ? (item.day_rule === 'FIXED_DAY' ? `Día ${item.day_of_month} de cada mes` : item.day_rule === 'LAST_DAY_OF_MONTH' ? 'Fin de mes' : 'Primer laborable')
           : 'frequency' in item ? (item.frequency === 'WEEKLY' ? 'Semanal' : 'Mensual')
             : isScheduled ? item.due_date : `Día ${item.due_day} de cada mes`
-        return <tr key={item.id}><td><strong>{item.name}</strong>{'is_primary' in item && item.is_primary && <small className="table-note">Principal</small>}</td><td>{account(item.account_id)?.name || '—'}</td><td>{detail}</td><td className="right amount">{formatMoney(isDebt ? item.remaining : item.amount, account(item.account_id)?.currency)}{isDebt && <small className="table-note">Pendiente · cuota {formatMoney(item.installment_amount, account(item.account_id)?.currency)}</small>}</td><td>{isScheduled ? item.status === 'PAID' ? 'Pagado' : active ? 'Previsto' : 'Cancelado' : active ? 'Activo' : 'Inactivo'}</td><td className="row-actions"><button disabled={isScheduled && item.status === 'PAID'} onClick={() => open(item)}>Editar</button><button disabled={isScheduled && item.status === 'PAID'} onClick={() => changeStatus.mutate({ item, next: !active })}>{active ? 'Pausar' : 'Activar'}</button></td></tr>
+        return <tr key={item.id}><td><strong>{item.name}</strong>{'is_primary' in item && item.is_primary && <small className="table-note">Principal</small>}</td><td>{account(item.account_id)?.name || '—'}</td><td>{detail}</td><td className="right amount">{formatMoney(isDebt ? item.remaining : item.amount, account(item.account_id)?.currency)}{isDebt && <small className="table-note">Pendiente · cuota {formatMoney(item.installment_amount, account(item.account_id)?.currency)}</small>}</td><td>{isScheduled ? item.status === 'PAID' ? 'Pagado' : active ? 'Previsto' : 'Cancelado' : active ? 'Activo' : 'Inactivo'}</td><td className="row-actions"><button disabled={isScheduled && item.status === 'PAID'} onClick={() => open(item)}>Editar</button><button disabled={isScheduled && item.status === 'PAID'} onClick={() => changeStatus.mutate({ item, next: !active })}>{active ? 'Pausar' : 'Activar'}</button><button disabled={remove.isPending} onClick={() => { if (window.confirm(`¿Eliminar «${item.name}»? Se eliminarán sus vínculos${tab === 'income' ? ' y sus reglas de ahorro asociadas' : ''}. Los movimientos reales se conservarán.`)) remove.mutate({ section: tab, id: item.id }) }}>Eliminar</button></td></tr>
       })}
     </tbody></table></div> : <div className="empty">Todavía no has añadido elementos en esta sección.</div>}</section>
     {links.length > 0 && <section className="panel"><div className="panel-header"><div><span className="eyebrow">TRAZABILIDAD</span><h3>Movimientos vinculados</h3></div></div>
