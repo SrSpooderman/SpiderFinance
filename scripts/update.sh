@@ -54,7 +54,7 @@ case "$mode" in
     "${local_compose[@]}" up -d --build --wait --wait-timeout 180
     ;;
   release)
-    "${release_compose[@]}" pull postgres backend frontend
+    "${release_compose[@]}" pull postgres backend frontend admin
     "${release_compose[@]}" up -d --no-build --wait --wait-timeout 180
     ;;
 esac

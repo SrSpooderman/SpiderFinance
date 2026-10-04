@@ -4,19 +4,14 @@ from fastapi import APIRouter, File, HTTPException, Response, UploadFile
 from sqlalchemy import select
 
 from app.api.dependencies import CurrentUser, DbSession
-from app.api.schemas import LoginIn, ProfilePhotoOut, RegisterIn, SettingsOut, SettingsPatch, TokenOut, UserOut
+from app.api.schemas import LoginIn, PasswordChangeIn, ProfilePhotoOut, RegisterIn, SettingsOut, SettingsPatch, TokenOut, UserOut
+from app.application.users import create_user
 from app.core.config import settings
 from app.core.security import create_token, hash_password, verify_password
-from app.infrastructure.models import Category, User, UserProfilePhoto, UserSettings
+from app.infrastructure.models import User, UserProfilePhoto, UserSettings
 
 router = APIRouter(tags=["auth"])
 MAX_PROFILE_PHOTO_BYTES = 2 * 1024 * 1024
-
-DEFAULT_CATEGORIES = (
-    "Alimentación", "Restaurantes", "Transporte", "Ocio", "Ropa", "Tecnología",
-    "Estudios", "Salud", "Viajes", "Hogar", "Suscripciones", "Deporte",
-    "Regalos", "Mascotas", "Impuestos", "Comisiones", "Otros",
-)
 
 
 @router.get("/auth/config")
@@ -31,13 +26,8 @@ def register(data: RegisterIn, db: DbSession) -> TokenOut:
     email = str(data.email).lower()
     if db.scalar(select(User.id).where(User.email == email)):
         raise HTTPException(409, "Ya existe una cuenta con este correo")
-    user = User(email=email, password_hash=hash_password(data.password))
-    db.add(user)
-    db.flush()
-    db.add(UserSettings(user_id=user.id))
-    db.add_all(Category(user_id=user.id, name=name) for name in DEFAULT_CATEGORIES)
-    db.commit()
-    return TokenOut(access_token=create_token(user.id))
+    user = create_user(db, email, data.password)
+    return TokenOut(access_token=create_token(user.id, user.auth_version))
 
 
 @router.post("/auth/login", response_model=TokenOut)
@@ -45,12 +35,25 @@ def login(data: LoginIn, db: DbSession) -> TokenOut:
     user = db.scalar(select(User).where(User.email == str(data.email).lower()))
     if user is None or not verify_password(data.password, user.password_hash):
         raise HTTPException(401, "Credenciales incorrectas")
-    return TokenOut(access_token=create_token(user.id))
+    return TokenOut(access_token=create_token(user.id, user.auth_version))
 
 
 @router.get("/auth/me", response_model=UserOut)
 def me(user: CurrentUser) -> User:
     return user
+
+
+@router.post("/auth/change-password", response_model=TokenOut)
+def change_password(data: PasswordChangeIn, user: CurrentUser, db: DbSession, response: Response) -> TokenOut:
+    if not verify_password(data.current_password, user.password_hash):
+        raise HTTPException(400, "La contraseña actual no es correcta")
+    if data.new_password == data.current_password:
+        raise HTTPException(400, "La nueva contraseña debe ser diferente")
+    user.password_hash = hash_password(data.new_password)
+    user.auth_version += 1
+    db.commit()
+    response.headers["Cache-Control"] = "no-store"
+    return TokenOut(access_token=create_token(user.id, user.auth_version))
 
 
 def photo_type(data: bytes) -> str | None:

@@ -7,8 +7,8 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app.api.auth import DEFAULT_CATEGORIES
 from app.application.template_import import import_template, read_template
+from app.application.users import DEFAULT_CATEGORIES
 from app.core.db import Base
 from app.infrastructure.models import (
     Account, Budget, Category, GoalContribution, IncomeReceipt, IncomeSource,

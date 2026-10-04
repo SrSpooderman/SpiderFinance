@@ -30,6 +30,8 @@ La aplicación usa un solo origen: el frontend se sirve en `/` y la API en `/api
 
 Para un proxy inverso instalado en el servidor, usa `compose.yaml` y dirige el dominio al puerto local `APP_PORT` (por defecto `127.0.0.1:8080`). Si tu gestor enruta directamente a contenedores, usa `compose.managed.yaml` y dirige el dominio completo a `frontend:80`. También puedes desplegar los servicios por separado o servir los archivos estáticos con tu propio proxy. Consulta [la guía de despliegue](docs/deployment.md) para las variables, rutas y comprobaciones de cada opción.
 
+Cada usuario puede cambiar su contraseña en **Configuración**. Para crear usuarios o reiniciarles la contraseña, configura `SUPERUSER_EMAIL` y `SUPERUSER_PASSWORD` en `.env` y abre el backoffice local en <http://127.0.0.1:8081/admin>. El acceso público a `/admin` y `/api/v1/admin/` está bloqueado. [La guía del backoffice](docs/administration.md) explica el acceso desde otro equipo mediante SSH y el uso con gestores de contenedores.
+
 ## Desarrollar
 
 Necesitas Python 3.12 o superior y Node.js 22. Ejecuta el backend y el frontend en terminales distintas. Cada bloque de comandos parte de la raíz del proyecto. El backend usa SQLite local por defecto, sin necesidad de arrancar Docker.

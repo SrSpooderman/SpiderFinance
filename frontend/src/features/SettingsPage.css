@@ -76,3 +76,9 @@
 .palette-preview.dark-purple { --sample-bg: #14121d; --sample-sidebar: #1b1629; --sample-card: #2e2a3d; --sample-accent: #7856bd; }
 
 @media (max-width: 460px) { .palette-grid { grid-template-columns: 1fr; } }
+
+.security-panel { grid-column: 1 / -1; }
+.security-form { display: grid; gap: 14px; max-width: 440px; margin-bottom: 15px; }
+.security-form label { display: grid; gap: 7px; font-size: 12px; font-weight: 700; color: #546670; }
+.security-form input { width: 100%; border: 1px solid #dce5e6; border-radius: 8px; padding: 10px 12px; color: #223b45; }
+.security-form .button { justify-self: start; }

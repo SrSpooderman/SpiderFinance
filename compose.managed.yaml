@@ -1,5 +1,6 @@
 # Para gestores que enrutan al puerto interno del contenedor frontend.
-# No publica puertos del host; asigna el dominio completo a frontend:80.
+# Solo admin publica un puerto del host, ligado a 127.0.0.1 por defecto.
+# Asigna el dominio completo a frontend:80 y ningún dominio a admin.
 services:
   postgres:
     image: postgres:16-alpine
@@ -24,6 +25,8 @@ services:
       SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in the deployment environment}
       CORS_ORIGINS: ${CORS_ORIGINS:-}
       REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
+      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL:-}
+      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,6 +49,23 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  admin:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      API_UPSTREAM: ${API_UPSTREAM:-http://backend:8000}
+      NGINX_ENVSUBST_TEMPLATE_DIR: /etc/nginx/templates/admin
+    ports:
+      - "${ADMIN_BIND_ADDRESS:-127.0.0.1}:${ADMIN_PORT:-8081}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/admin"]
       interval: 10s
       timeout: 5s
       retries: 5

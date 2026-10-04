@@ -21,6 +21,15 @@ class LoginIn(BaseModel):
     password: str
 
 
+class PasswordChangeIn(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=12, max_length=128)
+
+
+class AdminCreateUserIn(BaseModel):
+    email: EmailStr
+
+
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -29,6 +38,11 @@ class TokenOut(BaseModel):
 class UserOut(ORMModel):
     id: int
     email: EmailStr
+
+
+class AdminPasswordOut(BaseModel):
+    user: UserOut
+    password: str
 
 
 class ProfilePhotoOut(BaseModel):

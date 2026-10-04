@@ -13,12 +13,18 @@ server {
         return 308 /api/;
     }
 
+    location = /admin { return 404; }
+    location ^~ /admin/ { return 404; }
+    location = /api/v1/admin { return 404; }
+    location ^~ /api/v1/admin/ { return 404; }
+
     location /api/ {
         proxy_pass ${API_UPSTREAM};
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $client_proto;
+        proxy_set_header X-SpiderFinance-Admin-Gateway "";
     }
 
     location ~ ^/(docs|redoc)(/|$) {

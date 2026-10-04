@@ -2,7 +2,7 @@
 
 ## Comprobación de salud
 
-`docker compose ps` muestra el estado de los tres servicios. El backend verifica su conexión a PostgreSQL en `/health`; el frontend tiene un healthcheck HTTP.
+`docker compose ps` muestra el estado de los cuatro servicios. El backend verifica su conexión a PostgreSQL en `/health`; el frontend público y el backoffice local tienen healthchecks HTTP.
 
 ## Copias de seguridad
 
@@ -20,10 +20,10 @@ El workflow `.github/workflows/ci-release.yml` publica dos imágenes versionadas
 
 ## Seguridad y acceso público
 
-Genera claves distintas para cada instalación y no publiques los puertos de PostgreSQL ni del backend. El único puerto publicado por `compose.yaml` es el del frontend, controlado por `APP_BIND_ADDRESS` y `APP_PORT`. La dirección predeterminada `127.0.0.1` permite acceder desde el propio equipo; para otras interfaces, configura una dirección concreta o `0.0.0.0`.
+Genera claves distintas para cada instalación y no publiques los puertos de PostgreSQL ni del backend. `compose.yaml` publica el frontend mediante `APP_BIND_ADDRESS` y `APP_PORT`, y el backoffice solo en `127.0.0.1:8081` por defecto. El backoffice requiere `SUPERUSER_EMAIL` y `SUPERUSER_PASSWORD` en el entorno del backend. Consulta [Administración local](administration.md).
 
 Si expones la aplicación a Internet, dirige un dominio HTTPS mediante un proxy inverso al frontend, en su puerto interno `80`. El frontend reenvía `/api` al backend por la red de Compose: la API es accesible a través del dominio aunque su contenedor no tenga un puerto publicado. `CORS_ORIGINS` solo afecta a clientes de la API alojados en otro origen; no protege la API ni es necesario cambiarlo para el frontend integrado.
 
 Si el gestor enruta directamente a contenedores, usa `compose.managed.yaml` y asigna el dominio completo solo a `frontend:80`. Si cambias el destino del backend, ajusta `API_UPSTREAM` a un origen HTTP accesible desde el frontend, sin ruta final, y vuelve a desplegar. Consulta [la guía de despliegue](deployment.md) para instalarlo también con un proxy en el servidor o con servicios separados.
 
-Antes de publicar el dominio, crea la cuenta inicial con `REGISTRATION_ENABLED=true`, cambia la variable a `false` y recrea el backend. Comprueba que `GET /api/v1/auth/config` devuelve `registration_enabled: false` y que la pantalla ya no ofrece el registro. Nginx no reenvía `/docs`, `/redoc` ni `/openapi.json` desde el dominio público.
+Antes de publicar el dominio, configura `REGISTRATION_ENABLED=false` si las cuentas se crearán desde el backoffice local. Comprueba que `GET /api/v1/auth/config` devuelve `registration_enabled: false` y que la pantalla ya no ofrece el registro. Nginx no reenvía `/docs`, `/redoc`, `/openapi.json` ni las rutas administrativas desde el dominio público.

@@ -53,7 +53,7 @@ try {
             Invoke-Checked 'docker' ($base + @('up', '-d', '--build', '--wait', '--wait-timeout', '180'))
         }
         'release' {
-            Invoke-Checked 'docker' ($published + @('pull', 'postgres', 'backend', 'frontend'))
+            Invoke-Checked 'docker' ($published + @('pull', 'postgres', 'backend', 'frontend', 'admin'))
             Invoke-Checked 'docker' ($published + @('up', '-d', '--no-build', '--wait', '--wait-timeout', '180'))
         }
     }

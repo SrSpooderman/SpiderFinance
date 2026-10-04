@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://localhost:8080"
     registration_enabled: bool = True
     access_token_minutes: int = 60 * 24
+    superuser_email: str = ""
+    superuser_password: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

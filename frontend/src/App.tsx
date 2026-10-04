@@ -14,6 +14,7 @@ import InvestmentsPage from './features/InvestmentsPage'
 import ImportExportPage from './features/ImportExportPage'
 import ScenariosPage from './features/ScenariosPage'
 import TopbarClock from './features/TopbarClock'
+import AdminPage from './features/AdminPage'
 
 type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'investments' | 'imports' | 'scenarios' | 'settings'
 const sections: { id: Section; label: string; icon: string }[] = [
@@ -31,6 +32,11 @@ const sections: { id: Section; label: string; icon: string }[] = [
 ]
 
 export default function App() {
+  if (window.location.pathname === '/admin' || window.location.pathname.startsWith('/admin/')) return <AdminPage />
+  return <FinanceApp />
+}
+
+function FinanceApp() {
   const queryClient = useQueryClient()
   const [token, updateToken] = useState(getToken())
   const [section, setSection] = useState<Section>('dashboard')

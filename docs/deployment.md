@@ -8,7 +8,7 @@ Usa `compose.yaml`. Copia `.env.example` a `.env`, cambia `POSTGRES_PASSWORD` y 
 
 ## Gestor que enruta a contenedores
 
-Usa `compose.managed.yaml` como archivo Compose del despliegue. Define `POSTGRES_PASSWORD` y `SECRET_KEY` como variables de entorno del proyecto. Asigna el dominio completo al servicio `frontend`, puerto interno `80`; deja `backend` y `postgres` sin rutas públicas. Este archivo no publica puertos del host: el proxy del gestor debe tener acceso de red al contenedor frontend. Los tres servicios usan la red privada de Compose y PostgreSQL guarda los datos en el volumen `postgres_data`.
+Usa `compose.managed.yaml` como archivo Compose del despliegue. Define `POSTGRES_PASSWORD` y `SECRET_KEY` como variables de entorno del proyecto. Asigna el dominio completo al servicio `frontend`, puerto interno `80`; deja `backend`, `postgres` y `admin` sin rutas públicas. El proxy del gestor debe tener acceso de red al contenedor frontend. El único puerto de host es el del backoffice, ligado a `127.0.0.1:8081` por defecto. Los servicios usan la red privada de Compose y PostgreSQL guarda los datos en el volumen `postgres_data`.
 
 ## Servicios o alojamiento estático por separado
 
@@ -26,4 +26,6 @@ Si sirves directamente los archivos compilados de `frontend/dist` sin su contene
 
 Cuando uses el contenedor frontend, configura en tu proxy o gestor **una sola ruta para el dominio completo** hacia el frontend. Su Nginx ya separa `/api/`. Si enrutas `/api` directamente al backend, asegúrate de que tu proxy no quite el prefijo. El archivo `compose.yaml` publica el frontend en el host; `compose.managed.yaml` permite que el gestor llegue al puerto interno sin publicar un puerto del servidor.
 
-Comprueba `https://TU_DOMINIO/`, `https://TU_DOMINIO/api/` y `https://TU_DOMINIO/api/v1/auth/config`. El endpoint `/health` del backend comprueba internamente la conexión con PostgreSQL. `CORS_ORIGINS` solo es necesario para clientes alojados en otro origen; el frontend integrado no lo necesita. Tras crear la cuenta inicial, cambia `REGISTRATION_ENABLED` a `false` y vuelve a desplegar. Si ya tienes datos, migra la base antes de reemplazar la instalación: un volumen nuevo empieza vacío.
+Comprueba `https://TU_DOMINIO/`, `https://TU_DOMINIO/api/` y `https://TU_DOMINIO/api/v1/auth/config`. El endpoint `/health` del backend comprueba internamente la conexión con PostgreSQL. `CORS_ORIGINS` solo es necesario para clientes alojados en otro origen; el frontend integrado no lo necesita. Si administras las altas desde el backoffice, establece `REGISTRATION_ENABLED=false` antes de publicar el dominio. Si ya tienes datos, migra la base antes de reemplazar la instalación: un volumen nuevo empieza vacío.
+
+El backoffice usa un puerto local separado y credenciales `SUPERUSER_EMAIL`/`SUPERUSER_PASSWORD`; consulta [Administración local](administration.md). No asignes un dominio público al servicio `admin`.
