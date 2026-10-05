@@ -7,15 +7,7 @@ from email.message import EmailMessage
 from email_validator import EmailNotValidError, validate_email
 
 from app.core.config import Settings, settings
-from app.modules.notifications.ports import MailMessage
-
-
-class MailConfigurationError(ValueError):
-    pass
-
-
-class MailDeliveryError(RuntimeError):
-    pass
+from app.modules.notifications.ports import MailConfigurationError, MailDeliveryError, MailMessage
 
 
 class SmtpMailSender:

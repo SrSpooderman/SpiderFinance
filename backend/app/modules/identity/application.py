@@ -4,7 +4,7 @@ from base64 import b64encode
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from app.modules.errors import UseCaseError
-from app.modules.identity.domain import MAX_PROFILE_PHOTO_BYTES, photo_type, temporary_password
+from app.modules.identity.domain import MAX_PROFILE_PHOTO_BYTES, photo_type
 from app.modules.identity.ports import Credentials, IdentityStore
 
 
@@ -40,7 +40,7 @@ class Identity:
             raise UseCaseError(400, "La contraseña actual no es correcta")
         if new == current:
             raise UseCaseError(400, "La nueva contraseña debe ser diferente")
-        user = self.store.change_password(user_id, self.credentials.hash(new))
+        user = self.store.change_password(user_id, self.credentials.hash(new), user["password_hash"])
         return {"access_token": self.credentials.token(user_id, user["auth_version"])}
 
     def photo(self, user_id: int) -> dict:
@@ -77,16 +77,3 @@ class Identity:
 
     def users(self) -> list[dict]:
         return self.store.users()
-
-    def admin_create_user(self, email: str) -> dict:
-        password = temporary_password()
-        user = self.store.create_user(email.lower(), self.credentials.hash(password))
-        return {"user": user, "password": password}
-
-    def admin_reset_password(self, user_id: int) -> dict:
-        user = self.user(user_id)
-        password = temporary_password()
-        while self.credentials.verify(password, user["password_hash"]):
-            password = temporary_password()
-        user = self.store.change_password(user_id, self.credentials.hash(password))
-        return {"user": user, "password": password}

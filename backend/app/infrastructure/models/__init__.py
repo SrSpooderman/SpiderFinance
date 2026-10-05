@@ -7,11 +7,12 @@ from app.infrastructure.models.planning import Debt, DebtPayment, IncomeReceipt,
 from app.infrastructure.models.savings import GoalContribution, Reservation, SavingsGoal, SavingsRule
 from app.infrastructure.models.scenario import Scenario
 from app.infrastructure.models.transaction import Transaction
-from app.infrastructure.models.user import User, UserProfilePhoto, UserSettings
+from app.infrastructure.models.user import IdentityActionToken, IdentityMailThrottle, User, UserProfilePhoto, UserSettings
 
 __all__ = [
     "Account", "Budget", "Category", "Debt", "DebtPayment", "IncomeReceipt", "IncomeSource",
     "InvestmentContribution", "InvestmentPosition", "NetWorthSnapshot", "ImportJob", "ImportKey", "ImportRow",
     "RecurringExpense", "RecurringPayment", "Reservation", "SavingsGoal", "GoalContribution",
     "SavingsRule", "Scenario", "ScheduledExpense", "Transaction", "User", "UserProfilePhoto", "UserSettings",
+    "IdentityActionToken", "IdentityMailThrottle",
 ]

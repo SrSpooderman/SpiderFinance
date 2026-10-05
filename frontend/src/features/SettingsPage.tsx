@@ -22,7 +22,8 @@ export default function SettingsPage() {
   const [passwordError, setPasswordError] = useState('')
   const [changingPassword, setChangingPassword] = useState(false)
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: () => api<Settings>('/settings') })
-  const { data: me } = useQuery({ queryKey: ['me'], queryFn: () => api<{ id: number; email: string }>('/auth/me') })
+  const { data: me } = useQuery({ queryKey: ['me'], queryFn: () => api<{ id: number; email: string; email_verified_at: string | null }>('/auth/me') })
+  const { data: authConfig } = useQuery({ queryKey: ['auth-config'], queryFn: () => api<{ email_enabled: boolean }>('/auth/config') })
   const { data: profilePhoto } = useQuery({ queryKey: ['profile-photo'], queryFn: () => api<ProfilePhoto>('/auth/profile-photo') })
   const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: () => api<Category[]>('/categories') })
   const create = useMutation({ mutationFn: () => api<Category>('/categories', { method: 'POST', body: JSON.stringify({ name, parent_id: parent ? Number(parent) : null }) }), onSuccess: () => { setName(''); setParent(''); queryClient.invalidateQueries({ queryKey: ['categories'] }); setNotice('Categoría creada.') }, onError: (error: Error) => setNotice(error.message) })
@@ -87,6 +88,11 @@ export default function SettingsPage() {
       <form className="category-form" onSubmit={(event) => { event.preventDefault(); if (name.trim()) create.mutate() }}><input aria-label="Nombre de categoría" placeholder="Nueva categoría" value={name} onChange={(event) => setName(event.target.value)} /><select aria-label="Categoría principal" value={parent} onChange={(event) => setParent(event.target.value)}><option value="">Categoría principal</option>{categories.filter((item) => !item.parent_id).map((item) => <option key={item.id} value={item.id}>Bajo {item.name}</option>)}</select><button className="button primary" disabled={create.isPending}>Añadir</button></form>
       <div className="category-list">{categories.map((item) => <div key={item.id}><span>{item.parent_id && '↳ '}{item.name}</span><button onClick={() => { if (window.confirm(`¿Eliminar ${item.name}?`)) remove.mutate(item.id) }}>Eliminar</button></div>)}</div><p className="hint">Las categorías utilizadas en movimientos se conservan para mantener el historial.</p>
     </section><section className="panel security-panel"><div className="panel-header"><div><span className="eyebrow">SEGURIDAD</span><h3>Cambiar contraseña</h3></div></div>
+      {me && <div><p>Correo: {me.email} · {me.email_verified_at ? 'Verificado' : 'Sin verificar'}</p>
+        {!me.email_verified_at && authConfig?.email_enabled && <button className="button secondary" type="button" onClick={async () => {
+          try { const result = await api<{ message: string }>('/auth/email-verification/request', { method: 'POST' }); setNotice(result.message) }
+          catch (cause) { setNotice((cause as Error).message) }
+        }}>Enviar verificación</button>}</div>}
       <form className="security-form" onSubmit={changePassword}>
         <label>Contraseña actual<input type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} required /></label>
         <label>Nueva contraseña<input type="password" autoComplete="new-password" minLength={12} maxLength={128} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} required /></label>

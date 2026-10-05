@@ -1,8 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import './AdminPage.css'
 
-type AdminUser = { id: number; email: string }
-type PasswordResult = { user: AdminUser; password: string }
+type AdminUser = { id: number; email: string; email_verified_at: string | null }
+type InviteResult = { user: AdminUser; message: string }
 
 const adminTokenKey = 'spiderfinance-admin-token'
 
@@ -33,7 +33,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState('')
   const [newEmail, setNewEmail] = useState('')
   const [users, setUsers] = useState<AdminUser[]>([])
-  const [generated, setGenerated] = useState<PasswordResult | null>(null)
+  const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -42,7 +42,7 @@ export default function AdminPage() {
       sessionStorage.removeItem(adminTokenKey)
       setToken('')
       setUsers([])
-      setGenerated(null)
+      setNotice('')
     }
     setError((cause as Error).message)
   }
@@ -80,12 +80,12 @@ export default function AdminPage() {
     event.preventDefault()
     setBusy(true)
     setError('')
-    setGenerated(null)
+    setNotice('')
     try {
-      const result = await adminRequest<PasswordResult>('/users', {
+      const result = await adminRequest<InviteResult>('/users', {
         method: 'POST', body: JSON.stringify({ email: newEmail }),
       }, token)
-      setGenerated(result)
+      setNotice(`${result.message} a ${result.user.email}.`)
       setUsers((current) => [...current, result.user])
       setNewEmail('')
     } catch (cause) { handleActionError(cause) }
@@ -93,12 +93,12 @@ export default function AdminPage() {
   }
 
   const resetPassword = async (user: AdminUser) => {
-    if (!window.confirm(`¿Reiniciar la contraseña de ${user.email}? Sus sesiones actuales se cerrarán.`)) return
     setBusy(true)
     setError('')
-    setGenerated(null)
+    setNotice('')
     try {
-      setGenerated(await adminRequest<PasswordResult>(`/users/${user.id}/reset-password`, { method: 'POST' }, token))
+      const result = await adminRequest<{ message: string }>(`/users/${user.id}/password-recovery`, { method: 'POST' }, token)
+      setNotice(`${result.message} a ${user.email}.`)
     } catch (cause) { handleActionError(cause) }
     finally { setBusy(false) }
   }
@@ -107,7 +107,7 @@ export default function AdminPage() {
     sessionStorage.removeItem(adminTokenKey)
     setToken('')
     setUsers([])
-    setGenerated(null)
+    setNotice('')
   }
 
   if (!token) return <div className="admin-login"><form className="admin-login-card" onSubmit={login}>
@@ -122,12 +122,12 @@ export default function AdminPage() {
   return <div className="admin-shell"><div className="admin-content">
     <header className="admin-header"><div><span className="eyebrow">ACCESO LOCAL</span><h1>Administración de usuarios</h1></div><button className="button secondary" type="button" onClick={logout}>Cerrar sesión</button></header>
     {error && <div className="alert error" role="alert">{error}</div>}
-    {generated && <section className="panel admin-password-result" role="status"><h2>Contraseña temporal de {generated.user.email}</h2><code>{generated.password}</code><p>Cópiala ahora y entrégala al usuario por un canal seguro. Solo se muestra una vez; el usuario podrá cambiarla desde Configuración.</p></section>}
+    {notice && <div className="notice" role="status">{notice}</div>}
     <section className="panel"><div className="panel-header"><h2>Crear usuario</h2></div>
-      <form className="admin-create-form" onSubmit={createUser}><label>Correo electrónico<input type="email" autoComplete="off" value={newEmail} onChange={(event) => setNewEmail(event.target.value)} required /></label><button className="button primary" disabled={busy}>Crear y generar contraseña</button></form>
+      <form className="admin-create-form" onSubmit={createUser}><label>Correo electrónico<input type="email" autoComplete="off" value={newEmail} onChange={(event) => setNewEmail(event.target.value)} required /></label><button className="button primary" disabled={busy}>Crear y enviar invitación</button></form>
     </section>
     <section className="panel"><div className="panel-header"><h2>Usuarios</h2></div>
-      <div className="table-scroll"><table><thead><tr><th>Correo</th><th>Acción</th></tr></thead><tbody>{users.map((user) => <tr key={user.id}><td>{user.email}</td><td><button className="button secondary" type="button" disabled={busy} onClick={() => resetPassword(user)}>Reiniciar contraseña</button></td></tr>)}</tbody></table></div>
+      <div className="table-scroll"><table><thead><tr><th>Correo</th><th>Estado</th><th>Acción</th></tr></thead><tbody>{users.map((user) => <tr key={user.id}><td>{user.email}</td><td>{user.email_verified_at ? 'Verificado' : 'Pendiente'}</td><td><button className="button secondary" type="button" disabled={busy} onClick={() => resetPassword(user)}>{user.email_verified_at ? 'Enviar recuperación' : 'Enviar invitación'}</button></td></tr>)}</tbody></table></div>
       {users.length === 0 && <p className="hint">Todavía no hay usuarios.</p>}
     </section>
   </div></div>

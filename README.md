@@ -26,7 +26,7 @@ Los datos permanecen en el volumen de PostgreSQL entre arranques.
 
 ### Correo SMTP
 
-El backend incluye un transporte SMTP independiente del proveedor, **desactivado por defecto**. Para permitir envíos, define `SMTP_ENABLED=true`, `SMTP_HOST`, `SMTP_FROM` y, si el servidor requiere autenticación, `SMTP_USERNAME` y `SMTP_PASSWORD` en `.env`, y reinicia el backend. Usa `SMTP_SECURITY=starttls` con el puerto 587 o `SMTP_SECURITY=ssl` con el 465. El modo `none` solo sirve para un relay de confianza sin credenciales. La configuración completa está en `.env.example`. No hay correos automáticos ni cambios en las contraseñas.
+El backend incluye un transporte SMTP independiente del proveedor, **desactivado por defecto**. Para activar verificación de correo, invitaciones y recuperación de contraseña, define `SMTP_ENABLED=true`, `APP_PUBLIC_URL` con la URL pública HTTPS, `SMTP_HOST`, `SMTP_FROM` y, si el servidor requiere autenticación, `SMTP_USERNAME` y `SMTP_PASSWORD` en `.env`, y reinicia el backend. Usa `SMTP_SECURITY=starttls` con el puerto 587 o `SMTP_SECURITY=ssl` con el 465. El modo `none` solo sirve para un relay de confianza sin credenciales. La configuración completa está en `.env.example`. Con SMTP desactivado, el backoffice no crea usuarios ni inicia recuperaciones por correo.
 
 Con Resend puedes usar `smtp.resend.com`, puerto `465`, seguridad `ssl`, usuario `resend` y tu API key como `SMTP_PASSWORD`. El remitente debe ser una dirección autorizada en tu cuenta. Con Google Workspace, configura su relay SMTP o `smtp.gmail.com` con una contraseña de aplicación si tu cuenta la admite. La autenticación SMTP mediante OAuth requiere otro adaptador; el transporte actual cubre servidores que aceptan credenciales SMTP o relay sin autenticación.
 
@@ -42,7 +42,7 @@ La aplicación usa un solo origen: el frontend se sirve en `/` y la API en `/api
 
 Para un proxy inverso instalado en el servidor, usa `compose.yaml` y dirige el dominio al puerto local `APP_PORT` (por defecto `127.0.0.1:8080`). Si tu gestor enruta directamente a contenedores, usa `compose.managed.yaml` y dirige el dominio completo a `frontend:80`. También puedes desplegar los servicios por separado o servir los archivos estáticos con tu propio proxy. Consulta [la guía de despliegue](docs/deployment.md) para las variables, rutas y comprobaciones de cada opción.
 
-Cada usuario puede cambiar su contraseña en **Configuración**. Para crear usuarios o reiniciarles la contraseña, configura `SUPERUSER_EMAIL` y `SUPERUSER_PASSWORD` en `.env` y abre el backoffice local en <http://127.0.0.1:8081/admin>. El acceso público a `/admin` y `/api/v1/admin/` está bloqueado. [La guía del backoffice](docs/administration.md) explica el acceso desde otro equipo mediante SSH y el uso con gestores de contenedores.
+Cada usuario puede cambiar su contraseña en **Configuración**. Para crear usuarios o enviarles un enlace de recuperación, configura SMTP, `SUPERUSER_EMAIL` y `SUPERUSER_PASSWORD` en `.env` y abre el backoffice local en <http://127.0.0.1:8081/admin>. El acceso público a `/admin` y `/api/v1/admin/` está bloqueado. [La guía del backoffice](docs/administration.md) explica el acceso desde otro equipo mediante SSH y el uso con gestores de contenedores.
 
 ## Desarrollar
 

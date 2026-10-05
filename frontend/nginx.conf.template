@@ -5,6 +5,7 @@ map $http_x_forwarded_proto $client_proto {
 
 server {
     listen 80;
+    add_header Referrer-Policy "no-referrer" always;
     server_name _;
     root /usr/share/nginx/html;
     index index.html;

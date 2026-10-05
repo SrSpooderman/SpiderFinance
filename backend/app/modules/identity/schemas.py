@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field
@@ -24,6 +25,28 @@ class AdminCreateUserIn(BaseModel):
     email: EmailStr
 
 
+class EmailIn(BaseModel):
+    email: EmailStr
+
+
+class ActionTokenIn(BaseModel):
+    token: str = Field(min_length=32, max_length=256)
+
+
+class CompletePasswordIn(ActionTokenIn):
+    kind: Literal["reset", "invite"]
+    new_password: str = Field(min_length=12, max_length=128)
+
+
+class MessageOut(BaseModel):
+    message: str
+
+
+class AdminInviteOut(BaseModel):
+    user: "UserOut"
+    message: str
+
+
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -32,11 +55,7 @@ class TokenOut(BaseModel):
 class UserOut(ORMModel):
     id: int
     email: EmailStr
-
-
-class AdminPasswordOut(BaseModel):
-    user: UserOut
-    password: str
+    email_verified_at: datetime | None = None
 
 
 class ProfilePhotoOut(BaseModel):
@@ -55,5 +74,3 @@ class SettingsPatch(BaseModel):
     locale: str | None = Field(default=None, min_length=2, max_length=32)
     timezone: str | None = Field(default=None, min_length=3, max_length=64)
     theme: Literal["light-teal", "light-red", "dark-red", "dark-purple"] | None = None
-
-

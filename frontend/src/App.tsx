@@ -15,6 +15,7 @@ import ImportExportPage from './features/ImportExportPage'
 import ScenariosPage from './features/ScenariosPage'
 import TopbarClock from './features/TopbarClock'
 import AdminPage from './features/AdminPage'
+import EmailActionPage from './features/EmailActionPage'
 
 type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'investments' | 'imports' | 'scenarios' | 'settings'
 const sections: { id: Section; label: string; icon: string }[] = [
@@ -33,6 +34,7 @@ const sections: { id: Section; label: string; icon: string }[] = [
 
 export default function App() {
   if (window.location.pathname === '/admin' || window.location.pathname.startsWith('/admin/')) return <AdminPage />
+  if (window.location.pathname === '/verify-email' || window.location.pathname === '/reset-password') return <EmailActionPage />
   return <FinanceApp />
 }
 
@@ -40,7 +42,7 @@ function FinanceApp() {
   const queryClient = useQueryClient()
   const [token, updateToken] = useState(getToken())
   const [section, setSection] = useState<Section>('dashboard')
-  const me = useQuery({ queryKey: ['me'], queryFn: () => api<{ id: number; email: string }>('/auth/me'), enabled: !!token })
+  const me = useQuery({ queryKey: ['me'], queryFn: () => api<{ id: number; email: string; email_verified_at: string | null }>('/auth/me'), enabled: !!token })
   const profilePhoto = useQuery({ queryKey: ['profile-photo'], queryFn: () => api<ProfilePhoto>('/auth/profile-photo'), enabled: !!token })
   const settings = useQuery({ queryKey: ['settings'], queryFn: () => api<Settings>('/settings'), enabled: !!token })
   useEffect(() => { document.documentElement.dataset.theme = token ? settings.data?.theme || 'light-teal' : 'light-teal' }, [token, settings.data?.theme])

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     smtp_password: SecretStr = SecretStr("")
     smtp_from: str = ""
     smtp_timeout_seconds: float = Field(default=10, gt=0, le=60)
+    app_public_url: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

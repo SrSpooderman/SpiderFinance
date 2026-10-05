@@ -8,7 +8,7 @@ def test_registration_can_be_closed_without_disabling_login(client, auth, monkey
 
     config = client.get("/api/v1/auth/config")
     assert config.status_code == 200
-    assert config.json() == {"registration_enabled": False}
+    assert config.json() == {"registration_enabled": False, "email_enabled": False}
 
     registration = client.post("/api/v1/auth/register", json={
         "email": "another@example.com", "password": "another-strong-password",

@@ -2,7 +2,7 @@
 
 from app.api.common_schemas import ORMModel
 from app.modules.identity.schemas import (
-    AdminCreateUserIn, AdminPasswordOut, LoginIn, PasswordChangeIn, ProfilePhotoOut,
+    AdminCreateUserIn, AdminInviteOut, LoginIn, PasswordChangeIn, ProfilePhotoOut,
     RegisterIn, SettingsOut, SettingsPatch, TokenOut, UserOut,
 )
 from app.modules.ledger.schemas import (

@@ -14,3 +14,11 @@ class MailMessage:
 
 class MailSender(Protocol):
     def send(self, message: MailMessage) -> None: ...
+
+
+class MailConfigurationError(ValueError):
+    pass
+
+
+class MailDeliveryError(RuntimeError):
+    pass

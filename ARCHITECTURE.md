@@ -8,11 +8,11 @@ La entrega actual implementa las ocho fases: instalación con Docker, registro e
 
 Monolito modular con puertos y adaptadores, organizado por dominio en `backend/app/modules`. Los módulos separan reglas puras cuando las hay (`domain.py`), casos de uso (`application.py` y variantes), contratos de persistencia (`ports.py`) y adaptadores SQLAlchemy (`infrastructure.py` y variantes). Sus adaptadores HTTP viven en el mismo módulo (`api.py` o `*_api.py`); `app.main` compone las rutas directamente desde esos módulos. `app.http` contiene dependencias y esquemas compartidos, y `app.api` conserva importaciones de compatibilidad. Los casos de uso no importan FastAPI, SQLAlchemy ni modelos ORM. PostgreSQL es la base principal. El frontend React consume una API versionada. Cada entidad financiera pertenece a un usuario y toda consulta se filtra por el identificador obtenido del token autenticado.
 
-La reorganización no modifica tablas, columnas, relaciones ni migraciones. Los modelos de `backend/app/infrastructure/models` siguen siendo los adaptadores de persistencia de la base existente. `app.application` mantiene entradas de compatibilidad para el importador de plantilla y las reglas reutilizadas; el código de negocio reside en los módulos de dominio.
+La reorganización inicial no modificó la base de datos. La migración posterior `0011_identity_email_actions` añade únicamente la marca de correo verificado y las tablas de tokens y límites de envío del dominio de identidad; no modifica tablas financieras. Los modelos de `backend/app/infrastructure/models` siguen siendo los adaptadores de persistencia. `app.application` mantiene entradas de compatibilidad para el importador de plantilla y las reglas reutilizadas; el código de negocio reside en los módulos de dominio.
 
 | Dominio | Responsabilidad |
 | --- | --- |
-| `identity` | Usuarios, acceso, contraseñas, preferencias y fotos |
+| `identity` | Usuarios, acceso, contraseñas, verificación de correo, invitaciones, recuperación, preferencias y fotos |
 | `ledger` | Cuentas, categorías, movimientos, saldos y conciliación |
 | `planning` | Ingresos previstos, obligaciones, deudas y vínculos con movimientos |
 | `forecasting` | Previsión, ciclos de nómina y escenarios |
@@ -21,7 +21,7 @@ La reorganización no modifica tablas, columnas, relaciones ni migraciones. Los 
 | `investments` | Posiciones, aportaciones y patrimonio |
 | `imports` | Carga de archivos, previsualización, confirmación y exportación |
 | `reporting` | Consulta compuesta del dashboard |
-| `notifications` | Puerto de correo y adaptador SMTP saliente independiente del proveedor; desactivado por defecto y sin flujos automáticos todavía |
+| `notifications` | Puerto de correo y adaptador SMTP saliente independiente del proveedor; desactivado por defecto |
 
 Las integraciones externas se aíslan mediante puertos y adaptadores. El SMTP usa `MailSender` y `SmtpMailSender`; Resend u otro proveedor compatible se selecciona cambiando host, puerto, seguridad y credenciales, sin alterar los casos de uso. Su activación y sus secretos son configuración del despliegue (`SMTP_ENABLED` y demás variables). Si se necesita activar integraciones desde el backoffice sin reiniciar, una futura tabla guardará solo el estado operativo; las credenciales seguirán fuera de la base de datos. Yapily, al ser una API bancaria y no un servidor SMTP, tendrá su propio puerto y adaptador cuando se integre.
 
