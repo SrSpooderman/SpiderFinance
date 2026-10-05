@@ -29,3 +29,9 @@ Cuando uses el contenedor frontend, configura en tu proxy o gestor **una sola ru
 Comprueba `https://TU_DOMINIO/`, `https://TU_DOMINIO/api/` y `https://TU_DOMINIO/api/v1/auth/config`. El endpoint `/health` del backend comprueba internamente la conexión con PostgreSQL. `CORS_ORIGINS` solo es necesario para clientes alojados en otro origen; el frontend integrado no lo necesita. Si administras las altas desde el backoffice, establece `REGISTRATION_ENABLED=false` antes de publicar el dominio. Si ya tienes datos, migra la base antes de reemplazar la instalación: un volumen nuevo empieza vacío.
 
 El backoffice usa un puerto local separado y credenciales `SUPERUSER_EMAIL`/`SUPERUSER_PASSWORD`; consulta [Administración local](administration.md). No asignes un dominio público al servicio `admin`.
+
+## SMTP saliente
+
+El backend puede conectarse a un servidor SMTP mediante `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURITY` (`starttls`, `ssl` o `none`) y `SMTP_FROM`. El envío solo se permite con `SMTP_ENABLED=true`; el valor predeterminado es `false`. Si el servidor exige autenticación, configura juntos `SMTP_USERNAME` y `SMTP_PASSWORD`; la autenticación sin TLS está deshabilitada. `SMTP_TIMEOUT_SECONDS` controla el tiempo máximo de conexión. En Compose las variables se pasan al backend, sin publicar puertos SMTP. El transporte está preparado, pero todavía no hay correos automáticos ni cambios en los flujos de contraseñas.
+
+Para comprobar la conexión desde el contenedor, ejecuta `docker compose exec backend python -m app.modules.notifications --to tu-correo@example.com`. El comando envía un único mensaje de prueba al destinatario indicado cuando SMTP está activado. Las credenciales pertenecen al entorno de despliegue; si más adelante se añade un interruptor en el backoffice, la base de datos solo debería guardar el estado de activación, sin claves ni contraseñas SMTP.

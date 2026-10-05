@@ -21,6 +21,9 @@ La reorganización no modifica tablas, columnas, relaciones ni migraciones. Los 
 | `investments` | Posiciones, aportaciones y patrimonio |
 | `imports` | Carga de archivos, previsualización, confirmación y exportación |
 | `reporting` | Consulta compuesta del dashboard |
+| `notifications` | Puerto de correo y adaptador SMTP saliente independiente del proveedor; desactivado por defecto y sin flujos automáticos todavía |
+
+Las integraciones externas se aíslan mediante puertos y adaptadores. El SMTP usa `MailSender` y `SmtpMailSender`; Resend u otro proveedor compatible se selecciona cambiando host, puerto, seguridad y credenciales, sin alterar los casos de uso. Su activación y sus secretos son configuración del despliegue (`SMTP_ENABLED` y demás variables). Si se necesita activar integraciones desde el backoffice sin reiniciar, una futura tabla guardará solo el estado operativo; las credenciales seguirán fuera de la base de datos. Yapily, al ser una API bancaria y no un servidor SMTP, tendrá su propio puerto y adaptador cuando se integre.
 
 El sentido de las dependencias es `HTTP → aplicación → puertos y dominio`; los adaptadores SQL implementan los puertos. Las consultas que combinan dominios se montan desde lecturas de aplicación, como previsión y dashboard. Las lecturas de contabilidad que usan otros dominios se inyectan mediante `LedgerRead`; los adaptadores SQL de esos dominios no crean adaptadores SQL de contabilidad. Las restricciones de contabilidad que requieren comprobar inversiones, importaciones o planificación usan el puerto `LedgerPolicies` y su adaptador SQL de integración; `SqlLedgerStore` solo consulta sus propias tablas y las preferencias de zona horaria. La prueba `backend/tests/test_architecture.py` vigila estas fronteras. Las pruebas unitarias de puertos y reglas interdominio están en `backend/tests/test_module_ports.py` y `backend/tests/test_cross_domain_rules.py`.
 

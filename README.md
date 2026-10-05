@@ -24,6 +24,18 @@ docker compose down
 
 Los datos permanecen en el volumen de PostgreSQL entre arranques.
 
+### Correo SMTP
+
+El backend incluye un transporte SMTP independiente del proveedor, **desactivado por defecto**. Para permitir envíos, define `SMTP_ENABLED=true`, `SMTP_HOST`, `SMTP_FROM` y, si el servidor requiere autenticación, `SMTP_USERNAME` y `SMTP_PASSWORD` en `.env`, y reinicia el backend. Usa `SMTP_SECURITY=starttls` con el puerto 587 o `SMTP_SECURITY=ssl` con el 465. El modo `none` solo sirve para un relay de confianza sin credenciales. La configuración completa está en `.env.example`. No hay correos automáticos ni cambios en las contraseñas.
+
+Con Resend puedes usar `smtp.resend.com`, puerto `465`, seguridad `ssl`, usuario `resend` y tu API key como `SMTP_PASSWORD`. El remitente debe ser una dirección autorizada en tu cuenta. Con Google Workspace, configura su relay SMTP o `smtp.gmail.com` con una contraseña de aplicación si tu cuenta la admite. La autenticación SMTP mediante OAuth requiere otro adaptador; el transporte actual cubre servidores que aceptan credenciales SMTP o relay sin autenticación.
+
+Para enviar un correo de prueba explícito al destinatario que elijas:
+
+```bash
+docker compose exec backend python -m app.modules.notifications --to tu-correo@example.com
+```
+
 ## Publicar con cualquier gestor
 
 La aplicación usa un solo origen: el frontend se sirve en `/` y la API en `/api/`. El navegador solicita rutas relativas como `/api/v1/auth/config`; el contenedor frontend reenvía `/api/` al backend. El destino se configura en tiempo de ejecución con `API_UPSTREAM` (por defecto `http://backend:8000`).
