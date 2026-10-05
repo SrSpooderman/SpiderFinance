@@ -6,7 +6,23 @@ La entrega actual implementa las ocho fases: instalación con Docker, registro e
 
 ## Arquitectura elegida
 
-Monolito modular. FastAPI expone controladores delgados; los servicios de `application` aplican las reglas financieras; `domain` contiene enumeraciones y reglas puras; `infrastructure` implementa persistencia SQLAlchemy. PostgreSQL es la base principal. El frontend React consume una API versionada. Cada entidad financiera pertenece a un usuario y toda consulta se filtra por el identificador obtenido del token autenticado.
+Monolito modular con puertos y adaptadores, organizado por dominio en `backend/app/modules`. Los módulos separan reglas puras cuando las hay (`domain.py`), casos de uso (`application.py` y variantes), contratos de persistencia (`ports.py`) y adaptadores SQLAlchemy (`infrastructure.py` y variantes). Sus adaptadores HTTP viven en el mismo módulo (`api.py` o `*_api.py`); `app.main` compone las rutas directamente desde esos módulos. `app.http` contiene dependencias y esquemas compartidos, y `app.api` conserva importaciones de compatibilidad. Los casos de uso no importan FastAPI, SQLAlchemy ni modelos ORM. PostgreSQL es la base principal. El frontend React consume una API versionada. Cada entidad financiera pertenece a un usuario y toda consulta se filtra por el identificador obtenido del token autenticado.
+
+La reorganización no modifica tablas, columnas, relaciones ni migraciones. Los modelos de `backend/app/infrastructure/models` siguen siendo los adaptadores de persistencia de la base existente. `app.application` mantiene entradas de compatibilidad para el importador de plantilla y las reglas reutilizadas; el código de negocio reside en los módulos de dominio.
+
+| Dominio | Responsabilidad |
+| --- | --- |
+| `identity` | Usuarios, acceso, contraseñas, preferencias y fotos |
+| `ledger` | Cuentas, categorías, movimientos, saldos y conciliación |
+| `planning` | Ingresos previstos, obligaciones, deudas y vínculos con movimientos |
+| `forecasting` | Previsión, ciclos de nómina y escenarios |
+| `savings` | Reservas virtuales, objetivos y reglas de ahorro |
+| `budgets` | Presupuestos y estadísticas |
+| `investments` | Posiciones, aportaciones y patrimonio |
+| `imports` | Carga de archivos, previsualización, confirmación y exportación |
+| `reporting` | Consulta compuesta del dashboard |
+
+El sentido de las dependencias es `HTTP → aplicación → puertos y dominio`; los adaptadores SQL implementan los puertos. Las consultas que combinan dominios se montan desde lecturas de aplicación, como previsión y dashboard. Las lecturas de contabilidad que usan otros dominios se inyectan mediante `LedgerRead`; los adaptadores SQL de esos dominios no crean adaptadores SQL de contabilidad. Las restricciones de contabilidad que requieren comprobar inversiones, importaciones o planificación usan el puerto `LedgerPolicies` y su adaptador SQL de integración; `SqlLedgerStore` solo consulta sus propias tablas y las preferencias de zona horaria. La prueba `backend/tests/test_architecture.py` vigila estas fronteras. Las pruebas unitarias de puertos y reglas interdominio están en `backend/tests/test_module_ports.py` y `backend/tests/test_cross_domain_rules.py`.
 
 El dinero se guarda como `NUMERIC(18,2)` y se transmite como cadena decimal. Se evita `float` en el backend. La moneda es un código ISO en cada cuenta. En Fase 1 una transferencia exige la misma moneda en ambas cuentas; no se inventa un tipo de cambio. Los saldos se obtienen siempre de saldos iniciales y movimientos. Un movimiento tiene importe positivo y su tipo y cuentas determinan el signo. Una transferencia es un solo registro con dos efectos opuestos. El dashboard expone por moneda saldo total, ahorro en cuentas de ese tipo, reservas y disponible (`total - reservas`) para no confundir una transferencia con un gasto.
 

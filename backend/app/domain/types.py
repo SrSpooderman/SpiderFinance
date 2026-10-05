@@ -1,22 +1,4 @@
-from enum import StrEnum
+"""Compatibility exports for ledger enums."""
+from app.modules.ledger.types import AccountType, TransactionStatus, TransactionType
 
-
-class AccountType(StrEnum):
-    CHECKING = "CHECKING"
-    SAVINGS = "SAVINGS"
-    CASH = "CASH"
-    INVESTMENT = "INVESTMENT"
-    CARD = "CARD"
-    OTHER = "OTHER"
-
-
-class TransactionType(StrEnum):
-    INCOME = "INCOME"
-    EXPENSE = "EXPENSE"
-    TRANSFER = "TRANSFER"
-    ADJUSTMENT = "ADJUSTMENT"
-
-
-class TransactionStatus(StrEnum):
-    CLEARED = "CLEARED"
-    PENDING = "PENDING"
+__all__ = ["AccountType", "TransactionStatus", "TransactionType"]
