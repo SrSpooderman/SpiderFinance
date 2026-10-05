@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '../api/client'
+import RepositoryCredit from './RepositoryCredit'
 
 const params = new URLSearchParams(window.location.hash.slice(1))
 const initialToken = params.get('token') || ''
@@ -54,5 +55,6 @@ export default function EmailActionPage() {
     {message && <div className="notice" role="status">{message}</div>}
     {error && <div className="alert error" role="alert">{error}</div>}
     <a href="/">Ir al inicio de sesión</a>
+    <RepositoryCredit />
   </div></div>
 }

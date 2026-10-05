@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { api, setToken } from '../api/client'
+import RepositoryCredit from './RepositoryCredit'
 
 const schema = z.object({ email: z.string().email('Introduce un correo válido'), password: z.string().optional() })
 type Values = z.infer<typeof schema>
@@ -54,5 +55,6 @@ export default function AuthPage({ onAuthenticated }: { onAuthenticated: (token:
     <button className="button primary wide" disabled={isSubmitting}>{isSubmitting ? 'Un momento...' : mode === 'login' ? 'Entrar' : mode === 'register' ? 'Crear cuenta' : 'Enviar enlace'}</button>
     {mode === 'login' && emailEnabled && <div className="auth-switch"><button type="button" onClick={() => { setMode('forgot'); setError(''); setNotice('') }}>¿Has olvidado tu contraseña?</button></div>}
     {(registrationEnabled || mode !== 'login') && <div className="auth-switch">{mode === 'login' ? '¿Primera vez aquí?' : '¿Ya tienes cuenta?'} <button type="button" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setNotice('') }}>{mode === 'login' ? 'Regístrate' : 'Inicia sesión'}</button></div>}
+    <RepositoryCredit />
   </form></div></div>
 }

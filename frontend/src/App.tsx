@@ -16,6 +16,7 @@ import ScenariosPage from './features/ScenariosPage'
 import TopbarClock from './features/TopbarClock'
 import AdminPage from './features/AdminPage'
 import EmailActionPage from './features/EmailActionPage'
+import RepositoryCredit from './features/RepositoryCredit'
 
 type Section = 'dashboard' | 'transactions' | 'accounts' | 'planning' | 'forecast' | 'savings' | 'budgets' | 'investments' | 'imports' | 'scenarios' | 'settings'
 const sections: { id: Section; label: string; icon: string }[] = [
@@ -63,6 +64,7 @@ function FinanceApp() {
           <span className="nav-icon" aria-hidden="true">{item.icon}</span>{item.label}
         </button>)}
       </nav>
+      <RepositoryCredit />
       <div className="sidebar-bottom"><div className="avatar">{profilePhoto.data?.data_url ? <img src={profilePhoto.data.data_url} alt="" /> : me.data?.email?.[0]?.toUpperCase() || 'U'}</div>
         <div className="account-label"><strong>Mi espacio</strong><small>{me.data?.email || 'Cargando...'}</small></div>
         <button className="icon-button" title="Cerrar sesión" onClick={logout}>↪</button>

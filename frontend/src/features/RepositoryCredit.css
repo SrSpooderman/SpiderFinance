@@ -1,0 +1,60 @@
+.repository-credit {
+  display: grid;
+  gap: 3px;
+  width: fit-content;
+  max-width: 100%;
+  color: #66808a;
+  font-size: 11px;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.repository-credit > span:first-child {
+  font-size: 10px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.repository-credit strong {
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.repository-credit:hover strong,
+.repository-credit:focus-visible strong {
+  text-decoration: underline;
+}
+
+.repository-credit:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.sidebar .repository-credit {
+  margin-top: auto;
+  padding: 16px 4px;
+  color: #b6c3cf;
+}
+
+.sidebar .repository-credit + .sidebar-bottom {
+  margin-top: 0;
+}
+
+.auth-card .repository-credit {
+  justify-self: center;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.admin-content > .repository-credit {
+  margin: 28px auto 0;
+}
+
+@media (max-width: 750px) {
+  .sidebar .repository-credit {
+    margin: 6px auto 0;
+    padding: 8px 4px 0;
+    text-align: center;
+  }
+}

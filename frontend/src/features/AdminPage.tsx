@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import './AdminPage.css'
+import RepositoryCredit from './RepositoryCredit'
 
 type AdminUser = { id: number; email: string; email_verified_at: string | null }
 type InviteResult = { user: AdminUser; message: string }
@@ -117,6 +118,7 @@ export default function AdminPage() {
     <label>Contraseña<input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>
     {error && <div className="alert error" role="alert">{error}</div>}
     <button className="button primary wide" disabled={busy}>{busy ? 'Entrando...' : 'Entrar'}</button>
+    <RepositoryCredit />
   </form></div>
 
   return <div className="admin-shell"><div className="admin-content">
@@ -130,5 +132,6 @@ export default function AdminPage() {
       <div className="table-scroll"><table><thead><tr><th>Correo</th><th>Estado</th><th>Acción</th></tr></thead><tbody>{users.map((user) => <tr key={user.id}><td>{user.email}</td><td>{user.email_verified_at ? 'Verificado' : 'Pendiente'}</td><td><button className="button secondary" type="button" disabled={busy} onClick={() => resetPassword(user)}>{user.email_verified_at ? 'Enviar recuperación' : 'Enviar invitación'}</button></td></tr>)}</tbody></table></div>
       {users.length === 0 && <p className="hint">Todavía no hay usuarios.</p>}
     </section>
+    <RepositoryCredit />
   </div></div>
 }

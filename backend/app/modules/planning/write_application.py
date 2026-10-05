@@ -1,5 +1,7 @@
 """Planning commands and link invariants; depends on a persistence port."""
 
+from __future__ import annotations
+
 from datetime import date
 from decimal import Decimal
 

@@ -1,5 +1,7 @@
 """Budget use cases and reports independent of persistence and HTTP."""
 
+from __future__ import annotations
+
 from calendar import monthrange
 from datetime import date
 from decimal import Decimal
