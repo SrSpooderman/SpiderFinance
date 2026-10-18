@@ -44,6 +44,10 @@ Para un proxy inverso instalado en el servidor, usa `compose.yaml` y dirige el d
 
 Cada usuario puede cambiar su contraseña en **Configuración**. Para crear usuarios o enviarles un enlace de recuperación, configura SMTP, `SUPERUSER_EMAIL` y `SUPERUSER_PASSWORD` en `.env` y abre el backoffice local en <http://127.0.0.1:8081/admin>. El acceso público a `/admin` y `/api/v1/admin/` está bloqueado. [La guía del backoffice](docs/administration.md) explica el acceso desde otro equipo mediante SSH y el uso con gestores de contenedores.
 
+### Instancia demo pública
+
+Para publicar una demo separada, copia `.env.demo.example` como `.env.demo`, cambia ambas claves y arráncala con `docker compose -p spiderfinance-demo -f compose.demo.yaml --env-file .env.demo up -d --build`. La demo usa su propio volumen, carga datos ficticios automáticamente y permite explorar la aplicación en modo solo lectura. Dirige tu proxy HTTPS al puerto configurado en `APP_PORT` (8082 por defecto). No reutilices el `.env` ni el proyecto Compose de tu instancia personal. Detalles en [la guía de despliegue](docs/deployment.md#instancia-demo-separada).
+
 ## Desarrollar
 
 Necesitas Python 3.12 o superior y Node.js 22. Ejecuta el backend y el frontend en terminales distintas. Cada bloque de comandos parte de la raíz del proyecto. El backend usa SQLite local por defecto, sin necesidad de arrancar Docker.
