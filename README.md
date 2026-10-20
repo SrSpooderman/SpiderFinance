@@ -1,6 +1,19 @@
 # SpiderFinance
 
-Aplicación de finanzas personales autoalojada.
+Aplicación de finanzas personales autoalojada para organizar cuentas, registrar movimientos y planificar tus finanzas desde un único espacio privado.
+
+[**Probar la demo pública**](https://www.spoodercore.com/demo/spiderfinance/) · La demo usa datos ficticios y está en modo de solo lectura.
+
+![Resumen financiero de la demo de SpiderFinance](docs/screenshots/resumen.png)
+
+## Qué puedes hacer/home/srspooderman/Documentos/Proyectos/SpiderFinance/docs/screenshots/resumen.png
+
+- Consultar el saldo disponible, los saldos por cuenta, los gastos por categoría y los movimientos recientes.
+- Gestionar cuentas y movimientos, con transferencias y conciliación de saldos.
+- Planificar ingresos y gastos, revisar previsiones y crear escenarios.
+- Definir objetivos de ahorro, presupuestos e inversiones.
+- Importar y exportar movimientos y configurar preferencias personales.
+- Alojar la aplicación y sus datos en tu propio servidor.
 
 ## Instalar y ejecutar
 
