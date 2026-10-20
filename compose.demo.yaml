@@ -1,0 +1,58 @@
+# Instancia pública de demostración. Levántala con un proyecto y .env independientes:
+# docker compose -p spiderfinance-demo -f compose.demo.yaml --env-file .env.demo up -d --build
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-spiderfinance_demo}
+      POSTGRES_USER: ${POSTGRES_USER:-spiderfinance_demo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.demo}
+    volumes:
+      - demo_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-spiderfinance_demo}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-spiderfinance_demo}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env.demo}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      REGISTRATION_ENABLED: "false"
+      DEMO_MODE: "true"
+      SMTP_ENABLED: "false"
+      SUPERUSER_EMAIL: ""
+      SUPERUSER_PASSWORD: ""
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      API_UPSTREAM: ${API_UPSTREAM:-http://backend:8000}
+    ports:
+      - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-8082}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  demo_postgres_data:

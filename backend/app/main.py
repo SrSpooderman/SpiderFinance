@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
@@ -19,6 +19,24 @@ from app.modules.reporting import api as dashboard
 from app.modules.savings import api as savings
 
 app = FastAPI(title="SpiderFinance API", version="0.1.0")
+
+
+@app.middleware("http")
+async def demo_read_only(request: Request, call_next):
+    if settings.demo_mode and request.method not in {"GET", "HEAD", "OPTIONS"}:
+        allowed = request.method == "POST" and request.url.path in {
+            "/api/v1/auth/demo-login", "/api/v1/scenarios/simulate",
+        }
+        if not allowed:
+            return JSONResponse(status_code=403, content={"detail": "La demo es de solo lectura"})
+    return await call_next(request)
+
+
+@app.on_event("startup")
+def initialize_demo():
+    if settings.demo_mode:
+        from app.infrastructure.demo_seed import ensure_demo_data
+        ensure_demo_data()
 
 
 @app.exception_handler(UseCaseError)

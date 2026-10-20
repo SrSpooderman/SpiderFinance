@@ -27,7 +27,18 @@ def account_emails(db: DbSession) -> AccountEmails:
 
 @router.get("/auth/config")
 def auth_config() -> dict[str, bool]:
-    return {"registration_enabled": settings.registration_enabled, "email_enabled": settings.smtp_enabled and bool(settings.app_public_url and settings.smtp_host and settings.smtp_from)}
+    return {"registration_enabled": settings.registration_enabled, "email_enabled": settings.smtp_enabled and bool(settings.app_public_url and settings.smtp_host and settings.smtp_from), "demo_mode": settings.demo_mode}
+
+
+@router.post("/auth/demo-login", response_model=TokenOut)
+def demo_login(db: DbSession, response: Response):
+    if not settings.demo_mode:
+        raise UseCaseError(404, "Not Found")
+    account = SqlIdentityStore(db).user_by_email("demo@spiderfinance.com")
+    if account is None:
+        raise UseCaseError(503, "La cuenta demo todavía se está preparando")
+    response.headers["Cache-Control"] = "no-store"
+    return {"access_token": CoreCredentials().token(account["id"], account["auth_version"])}
 
 
 @router.post("/auth/register", response_model=TokenOut, status_code=201)

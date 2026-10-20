@@ -1,0 +1,4 @@
+.demo-banner{position:fixed;z-index:8;top:0;left:254px;right:0;min-height:42px;padding:8px 20px;display:flex;align-items:center;justify-content:center;gap:9px;background:#dff3e9;color:#174b3d;border-bottom:1px solid #b7ddca;font-size:13px}
+.demo-banner strong{font-weight:800}
+.demo-mode .main-shell{padding-top:42px}
+@media(max-width:750px){.demo-banner{left:0;min-height:44px;font-size:12px}.demo-mode .main-shell{padding-top:44px}}

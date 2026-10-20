@@ -14,10 +14,20 @@ export default function AuthPage({ onAuthenticated }: { onAuthenticated: (token:
   const [notice, setNotice] = useState('')
   const [emailEnabled, setEmailEnabled] = useState(false)
   const [registrationEnabled, setRegistrationEnabled] = useState(false)
+  const [demoMode, setDemoMode] = useState(false)
   useEffect(() => {
     let active = true
-    api<{ registration_enabled: boolean; email_enabled: boolean }>('/auth/config')
-      .then((config) => { if (active) { setRegistrationEnabled(config.registration_enabled); setEmailEnabled(config.email_enabled) } })
+    api<{ registration_enabled: boolean; email_enabled: boolean; demo_mode: boolean }>('/auth/config')
+      .then(async (config) => {
+        if (!active) return
+        setRegistrationEnabled(config.registration_enabled); setEmailEnabled(config.email_enabled); setDemoMode(config.demo_mode)
+        if (config.demo_mode) {
+          try {
+            const result = await api<{ access_token: string }>('/auth/demo-login', { method: 'POST' })
+            if (active) { setToken(result.access_token); onAuthenticated(result.access_token) }
+          } catch (cause) { if (active) setError((cause as Error).message) }
+        }
+      })
       .catch(() => {})
     return () => { active = false }
   }, [])
@@ -43,7 +53,8 @@ export default function AuthPage({ onAuthenticated }: { onAuthenticated: (token:
       onAuthenticated(result.access_token)
     } catch (cause) { setError((cause as Error).message) }
   })
-  return <div className="auth-layout"><div className="auth-intro"><div className="brand"><span className="brand-mark"><img src="/spider-coins.svg" alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div>
+  if (demoMode) return <div className="auth-layout"><div className="auth-intro"><div className="brand"><span className="brand-mark"><img src="/spiderfinance.png" alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div><div><span className="eyebrow">MODO DEMO</span><h1>Preparando<br />la demo…</h1><p>Estamos iniciando una sesión de muestra con datos ficticios.</p>{error && <div className="alert error" role="alert">{error}</div>}</div><small>Datos ficticios · Solo lectura</small></div></div>
+  return <div className="auth-layout"><div className="auth-intro"><div className="brand"><span className="brand-mark"><img src="/spiderfinance.png" alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div>
     <div><span className="eyebrow">CONTROL CLARO DE TU DINERO</span><h1>Tu dinero,<br />con perspectiva.</h1><p>Organiza tus cuentas y movimientos en un espacio privado que controlas tú.</p></div>
     <small>Autohospedado · Tus datos, en tu servidor</small>
   </div><div className="auth-panel"><form className="auth-card" onSubmit={submit}>

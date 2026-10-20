@@ -17,10 +17,6 @@ server {
         try_files $uri =404;
     }
 
-    location = /spider-coins.svg {
-        try_files $uri =404;
-    }
-
     location = /api/v1/admin/login {
         limit_req zone=admin_login burst=5 nodelay;
         limit_req_status 429;

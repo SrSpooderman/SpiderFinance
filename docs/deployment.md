@@ -35,3 +35,16 @@ El backoffice usa un puerto local separado y credenciales `SUPERUSER_EMAIL`/`SUP
 El backend puede conectarse a un servidor SMTP mediante `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURITY` (`starttls`, `ssl` o `none`) y `SMTP_FROM`. El envío solo se permite con `SMTP_ENABLED=true`; el valor predeterminado es `false`. Configura también `APP_PUBLIC_URL` con la URL pública HTTPS usada en enlaces de verificación, invitación y recuperación (`http://localhost` solo para desarrollo). Si el servidor exige autenticación, configura juntos `SMTP_USERNAME` y `SMTP_PASSWORD`; la autenticación sin TLS está deshabilitada. `SMTP_TIMEOUT_SECONDS` controla el tiempo máximo de conexión. En Compose las variables se pasan al backend, sin publicar puertos SMTP. Al activar SMTP, el registro envía verificación y se habilitan los flujos de recuperación por correo.
 
 Para comprobar la conexión desde el contenedor, ejecuta `docker compose exec backend python -m app.modules.notifications --to tu-correo@example.com`. El comando envía un único mensaje de prueba al destinatario indicado cuando SMTP está activado. Las credenciales pertenecen al entorno de despliegue; si más adelante se añade un interruptor en el backoffice, la base de datos solo debería guardar el estado de activación, sin claves ni contraseñas SMTP.
+
+## Instancia demo separada
+
+El repositorio incluye `compose.demo.yaml` y `.env.demo.example` para publicar una segunda instancia. Copia la plantilla a `.env.demo`, configura una contraseña de PostgreSQL y una `SECRET_KEY` aleatoria exclusiva, y arranca:
+
+```bash
+cp .env.demo.example .env.demo
+docker compose -p spiderfinance-demo -f compose.demo.yaml --env-file .env.demo up -d --build
+```
+
+El proyecto Compose, la red y el volumen `demo_postgres_data` son independientes de la instalación principal. Por defecto, la demo escucha en `127.0.0.1:8082`; configura tu proxy HTTPS para enviar el dominio de portfolio a ese puerto. No publiques PostgreSQL ni asignes un dominio al backend.
+
+`DEMO_MODE=true` desactiva el registro y el SMTP, crea una cuenta ficticia con movimientos, cuentas, planificación, presupuestos y posiciones de inversión, e inicia sesión automáticamente desde la página. La API rechaza todas las peticiones de escritura salvo la simulación temporal de escenarios; los cambios no afectan a los datos de muestra. La semilla se inserta solo si todavía no existe la cuenta demo. Para restaurar la muestra después de cambios operativos, detén esa instancia y elimina únicamente su volumen `demo_postgres_data` antes de volver a arrancarla. Esto borra todos los datos de esa base.

@@ -43,6 +43,7 @@ function FinanceApp() {
   const queryClient = useQueryClient()
   const [token, updateToken] = useState(getToken())
   const [section, setSection] = useState<Section>('dashboard')
+  const authConfig = useQuery({ queryKey: ['auth-config'], queryFn: () => api<{ demo_mode: boolean }>('/auth/config') })
   const me = useQuery({ queryKey: ['me'], queryFn: () => api<{ id: number; email: string; email_verified_at: string | null }>('/auth/me'), enabled: !!token })
   const profilePhoto = useQuery({ queryKey: ['profile-photo'], queryFn: () => api<ProfilePhoto>('/auth/profile-photo'), enabled: !!token })
   const settings = useQuery({ queryKey: ['settings'], queryFn: () => api<Settings>('/settings'), enabled: !!token })
@@ -55,9 +56,10 @@ function FinanceApp() {
     updateToken(null)
   }
   const title = sections.find((item) => item.id === section)?.label
-  return <div className="app-shell">
+  return <div className={`app-shell ${authConfig.data?.demo_mode ? 'demo-mode' : ''}`}>
+    {authConfig.data?.demo_mode && <div className="demo-banner"><strong>Modo demo</strong><span>Datos ficticios · Solo lectura · Los cambios no se guardan</span></div>}
     <aside className="sidebar">
-      <div className="brand"><span className="brand-mark"><img src="/spider-coins.svg" alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div>
+      <div className="brand"><span className="brand-mark"><img src="/spiderfinance.png" alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div>
       <div className="nav-caption">ESPACIO PERSONAL</div>
       <nav aria-label="Principal">
         {sections.map((item) => <button key={item.id} className={`nav-item ${section === item.id ? 'active' : ''}`} onClick={() => setSection(item.id)}>

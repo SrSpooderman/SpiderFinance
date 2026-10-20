@@ -18,6 +18,16 @@ El comando de inicio del backend ejecuta `alembic upgrade head` antes de servir 
 
 El workflow `.github/workflows/ci-release.yml` publica dos imágenes versionadas en GHCR y adjunta sus digests al GitHub Release. Las etiquetas automáticas se crean después de construir y subir ambas imágenes; las etiquetas manuales solo se publican si pasan las mismas pruebas. En una instalación basada en imágenes, `APP_VERSION` puede fijar una versión concreta para evitar actualizaciones inesperadas de `latest`.
 
+Tras publicar las imágenes y crear el GitHub Release, el workflow puede desplegar producción y demo en Coolify. Añade estos secretos del repositorio en **Settings → Secrets and variables → Actions**:
+
+| Secreto | Valor |
+| --- | --- |
+| `COOLIFY_PRODUCTION_WEBHOOK` | URL de deploy webhook del recurso de producción |
+| `COOLIFY_DEMO_WEBHOOK` | URL de deploy webhook del recurso demo |
+| `COOLIFY_TOKEN` | Un token de Coolify con permiso `deploy`, válido para ambos recursos |
+
+Activa el acceso a la API de Coolify y copia para cada recurso su webhook autenticado. El workflow envía un `GET` a cada URL con `Authorization: Bearer …`; las URLs y el token nunca se guardan en el repositorio. Si falta alguno de los tres secretos, omite ambos despliegues y deja un aviso en el resumen del job. Una vez configurados, un error de uno de los webhooks hace fallar el job después de intentar los dos. Coolify acepta la solicitud de despliegue; confirma por separado que cada recurso termina y queda saludable.
+
 ## Seguridad y acceso público
 
 Genera claves distintas para cada instalación y no publiques los puertos de PostgreSQL ni del backend. `compose.yaml` publica el frontend mediante `APP_BIND_ADDRESS` y `APP_PORT`, y el backoffice solo en `127.0.0.1:8081` por defecto. El backoffice requiere `SUPERUSER_EMAIL` y `SUPERUSER_PASSWORD` en el entorno del backend. Consulta [Administración local](administration.md).
