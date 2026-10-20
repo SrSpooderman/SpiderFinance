@@ -59,7 +59,7 @@ function FinanceApp() {
   return <div className={`app-shell ${authConfig.data?.demo_mode ? 'demo-mode' : ''}`}>
     {authConfig.data?.demo_mode && <div className="demo-banner"><strong>Modo demo</strong><span>Datos ficticios · Solo lectura · Los cambios no se guardan</span></div>}
     <aside className="sidebar">
-      <div className="brand"><span className="brand-mark"><img src="/spiderfinance.png" alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div>
+      <div className="brand"><span className="brand-mark"><img src={`${import.meta.env.BASE_URL}spiderfinance.png`} alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div>
       <div className="nav-caption">ESPACIO PERSONAL</div>
       <nav aria-label="Principal">
         {sections.map((item) => <button key={item.id} className={`nav-item ${section === item.id ? 'active' : ''}`} onClick={() => setSection(item.id)}>

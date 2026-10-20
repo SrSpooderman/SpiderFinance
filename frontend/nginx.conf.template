@@ -10,17 +10,17 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
-    location = /api {
-        return 308 /api/;
+    location = ${APP_BASE_PATH}api {
+        return 308 ${APP_BASE_PATH}api/;
     }
 
-    location = /admin { return 404; }
-    location ^~ /admin/ { return 404; }
-    location = /api/v1/admin { return 404; }
-    location ^~ /api/v1/admin/ { return 404; }
+    location = ${APP_BASE_PATH}admin { return 404; }
+    location ^~ ${APP_BASE_PATH}admin/ { return 404; }
+    location = ${APP_BASE_PATH}api/v1/admin { return 404; }
+    location ^~ ${APP_BASE_PATH}api/v1/admin/ { return 404; }
 
-    location /api/ {
-        proxy_pass ${API_UPSTREAM};
+    location ${APP_BASE_PATH}api/ {
+        proxy_pass ${API_UPSTREAM}/api/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -28,15 +28,16 @@ server {
         proxy_set_header X-SpiderFinance-Admin-Gateway "";
     }
 
-    location ~ ^/(docs|redoc)(/|$) {
+    location ~ ^${APP_BASE_PATH}(docs|redoc)(/|$) {
         return 404;
     }
 
-    location = /openapi.json {
+    location = ${APP_BASE_PATH}openapi.json {
         return 404;
     }
 
-    location / {
+    location ${APP_BASE_PATH} {
+        rewrite ^${APP_BASE_PATH}(.*)$ /$1 break;
         try_files $uri $uri/ /index.html;
     }
 }

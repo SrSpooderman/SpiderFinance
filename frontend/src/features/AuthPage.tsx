@@ -53,8 +53,8 @@ export default function AuthPage({ onAuthenticated }: { onAuthenticated: (token:
       onAuthenticated(result.access_token)
     } catch (cause) { setError((cause as Error).message) }
   })
-  if (demoMode) return <div className="auth-layout"><div className="auth-intro"><div className="brand"><span className="brand-mark"><img src="/spiderfinance.png" alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div><div><span className="eyebrow">MODO DEMO</span><h1>Preparando<br />la demo…</h1><p>Estamos iniciando una sesión de muestra con datos ficticios.</p>{error && <div className="alert error" role="alert">{error}</div>}</div><small>Datos ficticios · Solo lectura</small></div></div>
-  return <div className="auth-layout"><div className="auth-intro"><div className="brand"><span className="brand-mark"><img src="/spiderfinance.png" alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div>
+  if (demoMode) return <div className="auth-layout"><div className="auth-intro"><div className="brand"><span className="brand-mark"><img src={`${import.meta.env.BASE_URL}spiderfinance.png`} alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div><div><span className="eyebrow">MODO DEMO</span><h1>Preparando<br />la demo…</h1><p>Estamos iniciando una sesión de muestra con datos ficticios.</p>{error && <div className="alert error" role="alert">{error}</div>}</div><small>Datos ficticios · Solo lectura</small></div></div>
+  return <div className="auth-layout"><div className="auth-intro"><div className="brand"><span className="brand-mark"><img src={`${import.meta.env.BASE_URL}spiderfinance.png`} alt="" /></span><span>Spider<span className="brand-accent">Finance</span></span></div>
     <div><span className="eyebrow">CONTROL CLARO DE TU DINERO</span><h1>Tu dinero,<br />con perspectiva.</h1><p>Organiza tus cuentas y movimientos en un espacio privado que controlas tú.</p></div>
     <small>Autohospedado · Tus datos, en tu servidor</small>
   </div><div className="auth-panel"><form className="auth-card" onSubmit={submit}>

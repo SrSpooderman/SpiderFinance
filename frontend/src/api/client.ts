@@ -126,13 +126,15 @@ export const money = (value: string | number, currency = 'EUR', locale = 'es-ES'
 export const todayInTimezone = (timezone = 'Europe/Madrid') =>
   new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
 
+const apiBase = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/api/v1`
+
 const tokenKey = 'spiderfinance-token'
 export const getToken = () => localStorage.getItem(tokenKey)
 export const setToken = (token: string) => localStorage.setItem(tokenKey, token)
 export const clearToken = () => localStorage.removeItem(tokenKey)
 
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`/api/v1${path}`, {
+  const response = await fetch(`${apiBase}${path}`, {
     ...options,
     headers: {
       ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
