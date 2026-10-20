@@ -6,7 +6,7 @@ Aplicación de finanzas personales autoalojada para organizar cuentas, registrar
 
 ![Resumen financiero de la demo de SpiderFinance](docs/screenshots/resumen.png)
 
-## Qué puedes hacer/home/srspooderman/Documentos/Proyectos/SpiderFinance/docs/screenshots/resumen.png
+## Qué puedes hacer
 
 - Consultar el saldo disponible, los saldos por cuenta, los gastos por categoría y los movimientos recientes.
 - Gestionar cuentas y movimientos, con transferencias y conciliación de saldos.
